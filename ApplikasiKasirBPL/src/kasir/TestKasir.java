@@ -46,11 +46,7 @@ public class TestKasir extends JFrame {
 		contentPane.setLayout(null);
 		
 		Button button = new Button("Mila");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		button.setBounds(45, 40, 91, 27);
+		button.setBounds(62, 51, 91, 27);
 		contentPane.add(button);
 	}
 }
