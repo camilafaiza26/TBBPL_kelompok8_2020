@@ -1,11 +1,11 @@
 package kasir;
 
-public class barang {
+public class Barang {
 	
 	private Integer sku, stock, harga_beli, harga_jual;
 	private String nama;
 	
-	public barang(Integer sku, String nama, Integer stock, Integer harga_beli, Integer harga_jual) {
+	public Barang(Integer sku, String nama, Integer stock, Integer harga_beli, Integer harga_jual) {
 		setSku(sku);
 		setNama(nama);
 		setStock(stock);
