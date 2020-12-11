@@ -13,6 +13,7 @@ import java.awt.CardLayout;
 import java.awt.Button;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JMenuBar;
 
 public class TestKasir extends JFrame {
 
@@ -46,7 +47,11 @@ public class TestKasir extends JFrame {
 		contentPane.setLayout(null);
 		
 		Button button = new Button("Mila");
-		button.setBounds(62, 51, 91, 27);
+		button.setBounds(212, 53, 91, 27);
 		contentPane.add(button);
+		
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBounds(15, 16, 139, 31);
+		contentPane.add(menuBar);
 	}
 }
