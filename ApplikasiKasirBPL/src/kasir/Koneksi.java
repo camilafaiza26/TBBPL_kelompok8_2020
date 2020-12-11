@@ -12,7 +12,7 @@ public class Koneksi {
 		
 		try {
 			
-			String url = "jdbc:mysql://localhost/bpl_tb";
+			String url = "jdbc:mysql://localhost/tb_bpl";
 			String user = "root";
 			String pw = "";
 			
