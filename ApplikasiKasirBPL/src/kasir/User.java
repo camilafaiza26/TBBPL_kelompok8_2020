@@ -4,7 +4,9 @@ public class User {
 	private String uname, email, password;
 	
 	public User (String uname, String email, String password) {
-		
+		setUname(uname);
+		setEmail(email);
+		setPassword(password);
 	}
 
 	public String getUname() {
