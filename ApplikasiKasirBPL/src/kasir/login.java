@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 
 public class login {
@@ -91,7 +93,12 @@ public class login {
 					}
 					if(count==1) {
 						JOptionPane.showMessageDialog(null, "Username and Password is Correct");
-						
+						String sqlT = "UPDATE user SET login_terakhir=? WHERE username=?";
+						PreparedStatement pstT = connection.prepareStatement(sqlT);
+						Timestamp timestamp = new Timestamp(new Date().getTime());
+						pstT.setTimestamp(1, timestamp);
+						pstT.setString(2, usernameField.getText());
+						pstT.executeUpdate();
 					}
 					else {
 						JOptionPane.showMessageDialog(null, "Username and is Password not correct try again");
