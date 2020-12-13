@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.awt.event.ActionEvent;
 
-public class login {
+public class Login {
 
 	private JFrame frame;
 	private JTextField usernameField;
@@ -30,7 +30,7 @@ public class login {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					login window = new login();
+					Login window = new Login();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -43,7 +43,7 @@ public class login {
 	 * Create the application.
 	 * @throws SQLException 
 	 */
-	public login() throws SQLException {
+	public Login() throws SQLException {
 		initialize();
 		connection = Koneksi.koneksiDB();
 	}
@@ -99,6 +99,9 @@ public class login {
 						pstT.setTimestamp(1, timestamp);
 						pstT.setString(2, usernameField.getText());
 						pstT.executeUpdate();
+						frame.dispose();
+						FormKelolaBarang barang = new FormKelolaBarang();
+						barang.setVisible(true);
 					}
 					else {
 						JOptionPane.showMessageDialog(null, "Username and is Password not correct try again");

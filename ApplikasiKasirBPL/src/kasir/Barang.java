@@ -2,10 +2,10 @@ package kasir;
 
 public class Barang {
 	
-	private Integer sku, stock, harga_beli, harga_jual;
-	private String nama;
+	private Integer stock, harga_beli, harga_jual;
+	private String nama, sku;
 	
-	public Barang(Integer sku, String nama, Integer stock, Integer harga_beli, Integer harga_jual) {
+	public Barang(String sku, String nama, Integer stock, Integer harga_beli, Integer harga_jual) {
 		setSku(sku);
 		setNama(nama);
 		setStock(stock);
@@ -13,11 +13,11 @@ public class Barang {
 		setHarga_jual(harga_jual);
 	}
 	
-	public Integer getSku() {
+	public String getSku() {
 		return sku;
 	}
 	
-	public void setSku(Integer sku) {
+	public void setSku(String sku) {
 		this.sku = sku;
 	}
 	

@@ -18,22 +18,64 @@ import javax.swing.JTable;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
+
+import net.proteanit.sql.DbUtils;
+
 import javax.swing.ListSelectionModel;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class FormKelolaBarang extends JFrame {
 
 	private JPanel contentPane;
 	private JFrame frame;
-	private JTextField sku;
-	private JTextField nama_brg;
-	private JTextField stock;
-	private JTextField harga_beli;
-	private JTextField harga_jual;
-	private JTextField textField_5;
-	private JTable table;
+	private static JTextField skuField;
+	private static JTextField namaField;
+	private static JTextField stockField;
+	private static JTextField harga_beliField;
+	private static JTextField harga_jualField;
+	private static JTextField cariField;
+	private static JTable tableBarang;
 	
+	//KONEKSI
+	static Connection connection = null;
+	public FormKelolaBarang() throws SQLException {
+		initialize();
+		connection = Koneksi.koneksiDB();
+		refreshTable();
+	}
+	
+	static ArrayList<Barang> listBarang = new ArrayList<>();
+	public static void refreshTable() throws SQLException {
+		
+		String sql = "Select * from barang";
+		PreparedStatement pst = connection.prepareStatement(sql);
+		ResultSet rs = pst.executeQuery();
+		tableBarang.setModel(DbUtils.resultSetToTableModel(rs));
+		pst.close();
+		rs.close();
+		
+	}
+	
+	public static void clearField() {
+	
+		skuField.setText("");
+		namaField.setText("");
+		stockField.setText("");
+		harga_beliField.setText("");
+		harga_jualField.setText("");
+		
+	}
+	// rs2xml.jar
 	/**
 	 * Launch the application.
 	 */
@@ -53,8 +95,7 @@ public class FormKelolaBarang extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public FormKelolaBarang() {
-		super("Halaman Pengelolaan Data Barang");
+	private void initialize(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1400, 800);
 		contentPane = new JPanel();
@@ -117,40 +158,40 @@ public class FormKelolaBarang extends JFrame {
 		lblNewLabel_1_4.setBounds(25, 287, 107, 32);
 		panel_2.add(lblNewLabel_1_4);
 		
-		sku = new JTextField();
-		sku.setFont(new Font("Tahoma", Font.BOLD, 20));
-		sku.setBackground(new Color(255, 102, 153));
-		sku.setBounds(181, 40, 196, 32);
-		panel_2.add(sku);
-		sku.setColumns(10);
+		skuField = new JTextField();
+		skuField.setFont(new Font("Tahoma", Font.BOLD, 20));
+		skuField.setBackground(new Color(255, 102, 153));
+		skuField.setBounds(181, 40, 196, 32);
+		panel_2.add(skuField);
+		skuField.setColumns(10);
 		
-		nama_brg = new JTextField();
-		nama_brg.setFont(new Font("Tahoma", Font.BOLD, 20));
-		nama_brg.setBackground(new Color(255, 102, 153));
-		nama_brg.setColumns(10);
-		nama_brg.setBounds(181, 97, 196, 32);
-		panel_2.add(nama_brg);
+		namaField = new JTextField();
+		namaField.setFont(new Font("Tahoma", Font.BOLD, 20));
+		namaField.setBackground(new Color(255, 102, 153));
+		namaField.setColumns(10);
+		namaField.setBounds(181, 97, 196, 32);
+		panel_2.add(namaField);
 		
-		stock = new JTextField();
-		stock.setFont(new Font("Tahoma", Font.BOLD, 20));
-		stock.setBackground(new Color(255, 102, 153));
-		stock.setColumns(10);
-		stock.setBounds(181, 159, 196, 32);
-		panel_2.add(stock);
+		stockField = new JTextField();
+		stockField.setFont(new Font("Tahoma", Font.BOLD, 20));
+		stockField.setBackground(new Color(255, 102, 153));
+		stockField.setColumns(10);
+		stockField.setBounds(181, 159, 196, 32);
+		panel_2.add(stockField);
 		
-		harga_beli = new JTextField();
-		harga_beli.setFont(new Font("Tahoma", Font.BOLD, 20));
-		harga_beli.setBackground(new Color(255, 102, 153));
-		harga_beli.setColumns(10);
-		harga_beli.setBounds(181, 226, 196, 32);
-		panel_2.add(harga_beli);
+		harga_beliField = new JTextField();
+		harga_beliField.setFont(new Font("Tahoma", Font.BOLD, 20));
+		harga_beliField.setBackground(new Color(255, 102, 153));
+		harga_beliField.setColumns(10);
+		harga_beliField.setBounds(181, 226, 196, 32);
+		panel_2.add(harga_beliField);
 		
-		harga_jual = new JTextField();
-		harga_jual.setFont(new Font("Tahoma", Font.BOLD, 20));
-		harga_jual.setBackground(new Color(255, 102, 153));
-		harga_jual.setColumns(10);
-		harga_jual.setBounds(181, 291, 196, 32);
-		panel_2.add(harga_jual);
+		harga_jualField = new JTextField();
+		harga_jualField.setFont(new Font("Tahoma", Font.BOLD, 20));
+		harga_jualField.setBackground(new Color(255, 102, 153));
+		harga_jualField.setColumns(10);
+		harga_jualField.setBounds(181, 291, 196, 32);
+		panel_2.add(harga_jualField);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new MatteBorder(8, 8, 8, 8, (Color) new Color(255, 102, 153)));
@@ -163,32 +204,6 @@ public class FormKelolaBarang extends JFrame {
 		scrollPane.setBounds(21, 25, 771, 314);
 		panel_3.add(scrollPane);
 		
-		table = new JTable();
-		table.setBackground(new Color(255, 228, 225));
-		table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		table.setFillsViewportHeight(true);
-		table.setForeground(new Color(128, 0, 0));
-		table.setFont(new Font("Tahoma", Font.BOLD, 20));
-		table.setModel(new DefaultTableModel(
-			new Object[][] {
-				{null, null, null, null, null},
-			},
-			new String[] {
-				"SKU", "NAMA BARANG", "STOCK BARANG", "HARGA BELI", "HARGA JUAL"
-			}
-		));
-		table.getColumnModel().getColumn(0).setPreferredWidth(110);
-		table.getColumnModel().getColumn(0).setMinWidth(20);
-		table.getColumnModel().getColumn(1).setPreferredWidth(172);
-		table.getColumnModel().getColumn(1).setMinWidth(20);
-		table.getColumnModel().getColumn(2).setPreferredWidth(110);
-		table.getColumnModel().getColumn(2).setMinWidth(20);
-		table.getColumnModel().getColumn(3).setPreferredWidth(125);
-		table.getColumnModel().getColumn(3).setMinWidth(20);
-		table.getColumnModel().getColumn(4).setPreferredWidth(125);
-		table.getColumnModel().getColumn(4).setMinWidth(20);
-		scrollPane.setViewportView(table);
-		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBorder(new MatteBorder(8, 8, 8, 8, (Color) new Color(255, 102, 153)));
 		panel_4.setBackground(new Color(255, 204, 204));
@@ -198,55 +213,161 @@ public class FormKelolaBarang extends JFrame {
 		
 		JButton btnTambah = new JButton("ADD BARANG");
 		btnTambah.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e  ){
+				String sql = "INSERT INTO barang (sku, nama, stock, harga_beli, harga_jual) VALUES(?, ?, ?, ?, ?)";
 				
-				
+				try {
+					
+					PreparedStatement statement = connection.prepareStatement(sql);
+					statement.setString(1, skuField.getText());
+					statement.setString(1, skuField.getText());
+					statement.setString(2, namaField.getText());
+					statement.setInt(3, Integer.parseInt(stockField.getText()));
+					statement.setInt(4, Integer.parseInt(harga_beliField.getText()));
+					statement.setInt(5, Integer.parseInt(harga_jualField.getText()));
+					statement.executeUpdate();
+					JOptionPane.showMessageDialog(null, "Data Berhasil Masuk");
+					refreshTable();
+					clearField();
+				}catch(SQLException e1) {
+					
+					JOptionPane.showMessageDialog(null, "Koneksi Database Gagal");
+					
+				}
 				
 			}
 		});
-		btnTambah.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnTambah.setBounds(63, 27, 176, 33);
+		btnTambah.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnTambah.setBounds(90, 26, 169, 33);
 		panel_4.add(btnTambah);
 		
+		tableBarang = new JTable();
+		tableBarang.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				try {
+					
+					int row = tableBarang.getSelectedRow();
+					String sku = (tableBarang.getModel().getValueAt(row, 0)).toString();
+				
+					String sql = "Select * from barang where sku = '"+sku+"' ";
+					PreparedStatement pst;
+					pst = connection.prepareStatement(sql);
+					ResultSet rs = pst.executeQuery();
+					while(rs.next()) {
+						skuField.setText(rs.getString("sku"));
+						namaField.setText(rs.getString("nama"));
+						stockField.setText(rs.getString("stock"));
+						harga_beliField.setText(rs.getString("harga_beli"));
+						harga_jualField.setText(rs.getString("harga_jual"));
+					}
+					
+					stockField.disable();
+					btnTambah.setEnabled(false);
+					
+				}catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+//				pst.close();
+//				rs.close();
+			}
+		});
+		tableBarang.setBackground(new Color(255, 228, 225));
+		tableBarang.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		tableBarang.setFillsViewportHeight(true);
+		tableBarang.setForeground(new Color(128, 0, 0));
+		tableBarang.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		tableBarang.setModel(new DefaultTableModel(
+			new Object[][] {
+				{null, null, null, null, null},
+			},
+			new String[] {
+				"SKU", "NAMA BARANG", "STOCK BARANG", "HARGA BELI", "HARGA JUAL"
+			}
+		));
+		tableBarang.getColumnModel().getColumn(0).setPreferredWidth(110);
+		tableBarang.getColumnModel().getColumn(0).setMinWidth(20);
+		tableBarang.getColumnModel().getColumn(1).setPreferredWidth(172);
+		tableBarang.getColumnModel().getColumn(1).setMinWidth(20);
+		tableBarang.getColumnModel().getColumn(2).setPreferredWidth(110);
+		tableBarang.getColumnModel().getColumn(2).setMinWidth(20);
+		tableBarang.getColumnModel().getColumn(3).setPreferredWidth(125);
+		tableBarang.getColumnModel().getColumn(3).setMinWidth(20);
+		tableBarang.getColumnModel().getColumn(4).setPreferredWidth(125);
+		tableBarang.getColumnModel().getColumn(4).setMinWidth(20);
+		scrollPane.setViewportView(tableBarang);
+		
 		JButton btnEdit = new JButton("EDIT BARANG");
-		btnEdit.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnEdit.setBounds(257, 27, 176, 33);
+		btnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					
+					String sql = "UPDATE barang SET nama =?, harga_beli=?, harga_jual=? WHERE sku=?";
+					PreparedStatement statement = connection.prepareStatement(sql);
+	
+					statement.setString(4, skuField.getText());
+					statement.setString(1, namaField.getText());
+					statement.setInt(2, Integer.parseInt(harga_beliField.getText()));
+					statement.setInt(3, Integer.parseInt(harga_jualField.getText()));
+					statement.executeUpdate();
+					JOptionPane.showMessageDialog(null, "Data Berhasil Diupdate!");
+					refreshTable();
+					clearField();
+					
+				}catch(SQLException e1) {
+					
+					JOptionPane.showMessageDialog(null, "Koneksi Database Gagal");
+					
+				}
+				
+			}
+		});
+		btnEdit.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnEdit.setBounds(280, 26, 169, 33);
 		panel_4.add(btnEdit);
 		
 		JButton btnHapusBarang = new JButton("DELETE BARANG");
-		btnHapusBarang.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnHapusBarang.setBounds(453, 27, 213, 33);
-		panel_4.add(btnHapusBarang);
-		
-		JButton btnReset = new JButton("RESET");
-		btnReset.addActionListener(new ActionListener() {
+		btnHapusBarang.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				sku.setText("");
-				nama_brg.setText("");
-				stock.setText("");
-				harga_beli.setText("");
-				harga_jual.setText("");
-				
+				try {
+					
+					String sql = "DELETE FROM barang WHERE sku = ?";
+					PreparedStatement statement = connection.prepareStatement(sql);
+					statement.setString(1, skuField.getText());
+					statement.execute();
+					JOptionPane.showMessageDialog(null, "Data Berhasil Dihapus");
+					refreshTable();
+					clearField();
+					
+				}catch(SQLException e1) {
+					
+					JOptionPane.showMessageDialog(null, "Koneksi Database Gagal");
+					
+				}
 			}
 		});
-		btnReset.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnReset.setBounds(687, 27, 146, 33);
-		panel_4.add(btnReset);
+		btnHapusBarang.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnHapusBarang.setBounds(478, 26, 197, 33);
+		panel_4.add(btnHapusBarang);
 		
-		JButton btnExit = new JButton("EXIT");
+		JButton btnExit = new JButton("BACK");
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				frame = new JFrame();
 				if(JOptionPane.showConfirmDialog(frame, "Apakah Anda Yakin Untuk keluar ?", "Confirm to leave page", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_NO_OPTION) {
+					
 					System.exit(0);
+					
 				}
 				
 			}
 		});
-		btnExit.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnExit.setBounds(1021, 27, 146, 33);
+		btnExit.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnExit.setBounds(1065, 26, 87, 33);
 		panel_4.add(btnExit);
 		
 		JButton btnPrint = new JButton("PRINT");
@@ -255,7 +376,7 @@ public class FormKelolaBarang extends JFrame {
 				
 				try {
 					
-					table.print();
+					tableBarang.print();
 					
 				}catch(java.awt.print.PrinterException eb){
 					System.err.format("Terjadi kesalahan pada printer", eb.getMessage());
@@ -263,20 +384,47 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnPrint.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnPrint.setBounds(854, 27, 146, 33);
+		btnPrint.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnPrint.setBounds(942, 26, 97, 33);
 		panel_4.add(btnPrint);
 		
-		textField_5 = new JTextField();
-		textField_5.setFont(new Font("Tahoma", Font.BOLD, 20));
-		textField_5.setColumns(10);
-		textField_5.setBackground(new Color(255, 102, 153));
-		textField_5.setBounds(950, 128, 196, 32);
-		panel.add(textField_5);
+		JButton btnRestockBarang = new JButton("RESTOCK BARANG");
+		btnRestockBarang.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		btnRestockBarang.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnRestockBarang.setBounds(700, 26, 213, 33);
+		panel_4.add(btnRestockBarang);
 		
-		JButton btnNewButton = new JButton("CARI");
-		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 20));
-		btnNewButton.setBounds(1156, 127, 89, 33);
-		panel.add(btnNewButton);
+		cariField = new JTextField();
+		cariField.setToolTipText("");
+		cariField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				
+				try {
+					String sql="SELECT * FROM barang WHERE sku LIKE ? OR nama LIKE ?";
+					PreparedStatement statement = connection.prepareStatement(sql);
+					
+					statement.setString(1, "%"+cariField.getText()+"%");
+					statement.setString(2, "%"+cariField.getText()+"%");
+					ResultSet rs = statement.executeQuery();
+					tableBarang.setModel(DbUtils.resultSetToTableModel(rs));
+					
+					
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+		});
+		cariField.setFont(new Font("Tahoma", Font.BOLD, 20));
+		cariField.setColumns(10);
+		cariField.setBackground(new Color(255, 102, 153));
+		cariField.setBounds(1054, 127, 196, 32);
+		panel.add(cariField);
 	}
 }

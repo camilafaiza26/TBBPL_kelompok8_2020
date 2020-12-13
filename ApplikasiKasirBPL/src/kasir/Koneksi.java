@@ -12,7 +12,7 @@ public class Koneksi {
 		
 		try {
 			
-			String url = "jdbc:mysql://localhost/tb_bpl";
+			String url = "jdbc:mysql://localhost/tb_bpl?serverTimezone=Asia/Jakarta";
 			String user = "root";
 			String pw = "";
 			
