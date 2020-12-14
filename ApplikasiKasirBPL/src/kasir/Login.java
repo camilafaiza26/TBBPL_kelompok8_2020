@@ -185,7 +185,8 @@ public class Login {
 			
 			public void actionPerformed(ActionEvent arg0) {
 				
-				try {
+				try {	
+					
 					String sql = "SELECT * FROM user WHERE username=? and password=?";
 					PreparedStatement pst = connection.prepareStatement(sql);
 					pst.setString(1, usernameField.getText());
@@ -196,6 +197,7 @@ public class Login {
 					while (rs.next()) {
 						count = count+1;
 					}
+					
 					if(count==1) {
 						JOptionPane.showMessageDialog(null, "Log In Success");
 
@@ -214,23 +216,38 @@ public class Login {
 							FormKelolaBarang barang = new FormKelolaBarang();
 							barang.setVisible(true);
 						}
-						
-						
+							
 					}
+					
 					else {
 						salah = salah +1;
-						if (salah==3){
-							RandomString random = new RandomString();
-							random.getRandom();
-							usernameField.setText(random.getRandom());
-							salah = 0;
+						if (count == 0) {
+							
+							JOptionPane.showMessageDialog(null, "Username not found!");
+							
 						}
 						else {
-						JOptionPane.showMessageDialog(null, "Invalid username or password!"  + salah);
+							if (salah==3){
+							RandomString random = new RandomString();
+							random.getRandom();
+							pwdPassword.setText(random.getRandom());
+							salah = 0;
+							
+							String sqlp = "UPDATE user SET password=? WHERE username=?";
+							PreparedStatement pstp = connection.prepareStatement(sqlp);
+							pstp.setString(1, pwdPassword.getText());
+							pstp.setString(2, usernameField.getText());
+							pstp.executeUpdate();
+							
+							}
+							else {
+								JOptionPane.showMessageDialog(null, "Invalid username or password!"  + salah);
+							}
 						}
 						
 						
 						
+					}	
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
