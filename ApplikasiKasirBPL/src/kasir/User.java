@@ -1,20 +1,20 @@
 package kasir;
 
 public class User {
-	private String uname, email, password;
+	private String username, email, password;
 	
-	public User (String uname, String email, String password) {
-		setUname(uname);
+	public User (String username, String email, String password) {
+		setUsername(username);
 		setEmail(email);
 		setPassword(password);
 	}
 
-	public String getUname() {
-		return uname;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setUname(String uname) {
-		this.uname = uname;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getEmail() {
