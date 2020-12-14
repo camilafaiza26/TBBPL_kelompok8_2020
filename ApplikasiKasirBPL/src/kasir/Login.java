@@ -185,7 +185,7 @@ public class Login {
 			
 			public void actionPerformed(ActionEvent arg0) {
 				
-				try {	
+				try {		
 					
 					String sql = "SELECT * FROM user WHERE username=? and password=?";
 					PreparedStatement pst = connection.prepareStatement(sql);
@@ -244,11 +244,9 @@ public class Login {
 								JOptionPane.showMessageDialog(null, "Invalid username or password!"  + salah);
 							}
 						}
-						
-						
-						
+							
 					}	
-					}
+					
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
