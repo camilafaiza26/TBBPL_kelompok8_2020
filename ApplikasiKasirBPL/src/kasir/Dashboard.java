@@ -7,6 +7,7 @@ import java.awt.Image;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -100,6 +101,19 @@ public class Dashboard extends JFrame {
 		panelBarang.add(lblIconBarang);
 		
 		JButton btnBarang = new JButton("Pengelolaan Barang");
+		btnBarang.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				FormKelolaBarang fkb;
+				try {
+					fkb = new FormKelolaBarang();
+					fkb.setVisible(true);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+		});
 		btnBarang.setForeground(Color.WHITE);
 		btnBarang.setBackground(SystemColor.controlDkShadow);
 		btnBarang.setBounds(15, 44, 190, 29);
@@ -121,6 +135,9 @@ public class Dashboard extends JFrame {
 		JButton btnTransaksi = new JButton("Pengelolaan Transaksi");
 		btnTransaksi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+					DashboardKasir db = new DashboardKasir();
+					db.setVisible(true);
 			}
 		});
 		btnTransaksi.setForeground(Color.WHITE);
@@ -161,6 +178,12 @@ public class Dashboard extends JFrame {
 		panelLogOut.add(lblIconLogOut);
 		
 		JButton btnLogOut = new JButton("Log Out");
+		btnLogOut.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				
+			}
+		});
 		btnLogOut.setForeground(Color.WHITE);
 		btnLogOut.setBackground(SystemColor.controlDkShadow);
 		btnLogOut.setBounds(15, 50, 89, 24);
