@@ -82,6 +82,20 @@ public class Dashboard extends JFrame {
 		panelUser.add(lblIconUser);
 		
 		JButton btnUser = new JButton("Pengelolaan User");
+		btnUser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+					FormKelolaUser kelolaUser;
+					try {
+						kelolaUser = new FormKelolaUser();
+						kelolaUser.setVisible(true);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				
+			}
+		});
 		btnUser.setForeground(Color.WHITE);
 		btnUser.setBackground(SystemColor.controlDkShadow);
 		btnUser.setBounds(15, 41, 190, 29);
@@ -180,6 +194,15 @@ public class Dashboard extends JFrame {
 		JButton btnLogOut = new JButton("Log Out");
 		btnLogOut.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+					Login login;
+					try {
+						login = new Login();
+						login.setVisible(true);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				
 				
 			}

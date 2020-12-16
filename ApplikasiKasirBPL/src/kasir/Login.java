@@ -1,5 +1,6 @@
 package kasir;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.util.Random;
@@ -22,71 +23,73 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-public class Login {
+public class Login extends JFrame {
 
+	private JPanel contentPane;
 	private JFrame frame;
 	private JTextField usernameField;
-	
+	private JPasswordField pwdPassword;
+	private JLabel lblLogin = new JLabel("");
 	private Image img_logo = new ImageIcon (Login.class.getResource("/ico/store.png")).getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
 	private Image img_username = new ImageIcon (Login.class.getResource("/ico/lock.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_password = new ImageIcon (Login.class.getResource("/ico/keyhole.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_login = new ImageIcon (Login.class.getResource("/ico/enter.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	static String userTransaksi;
+	
 	/**
 	 * Launch the application.
 	 */
+	static Connection connection = null;
+	int salah = 0;
+	
+	public Login() throws SQLException{
+		initialize();
+		connection = Koneksi.koneksiDB();
+	}
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Login window = new Login();
-					window.frame.setVisible(true);
+					Login frame = new Login();
+					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
 	}
-	Connection connection = null;
-	private JPasswordField pwdPassword;
-	int salah = 0;
+	
+	
 	/**
-	 * Create the application.
-	 * @throws SQLException 
+	 * Create the frame.
 	 */
-	public Login() throws SQLException {
-		initialize();
-		connection = Koneksi.koneksiDB();
-		
-	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
-		frame = new JFrame();
-		frame.getContentPane().setBackground(new Color(169, 169, 169));
-		frame.setBackground(new Color(222, 184, 135));
-		frame.setBounds(100, 100, 656, 464);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
+	public void initialize () {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 656, 464);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(192, 192, 192));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setIcon(new ImageIcon(img_logo));
 		lblNewLabel.setFont(new Font("Wide Latin", Font.PLAIN, 32));
 		lblNewLabel.setBounds(185, 16, 268, 119);
-		frame.getContentPane().add(lblNewLabel);
+		contentPane.add(lblNewLabel);
 		
 		JPanel panelUsername = new JPanel();
 		panelUsername.setBackground(new Color(245, 245, 245));
 		panelUsername.setBorder(null);
 		panelUsername.setBounds(166, 160, 300, 53);
-		frame.getContentPane().add(panelUsername);
+		contentPane.add(panelUsername);
 		panelUsername.setLayout(null);
 		
 		JLabel lblIconUsername = new JLabel("");
@@ -125,7 +128,7 @@ public class Login {
 		panelPassword.setBorder(null);
 		panelPassword.setBackground(new Color(245, 245, 245));
 		panelPassword.setBounds(166, 229, 300, 53);
-		frame.getContentPane().add(panelPassword);
+		contentPane.add(panelPassword);
 		panelPassword.setLayout(null);
 		
 		JLabel lblIconPassword = new JLabel("");
@@ -138,6 +141,7 @@ public class Login {
 		pwdPassword.setBounds(94, 13, 191, 30);
 		pwdPassword.addFocusListener(new FocusAdapter() {
 			
+			@SuppressWarnings("deprecation")
 			@Override
 			public void focusGained(FocusEvent e) {
 				if(pwdPassword.getText().equals("Password")) {
@@ -148,6 +152,7 @@ public class Login {
 					pwdPassword.selectAll();
 				}
 			}
+			@SuppressWarnings("deprecation")
 			@Override
 			public void focusLost(FocusEvent e) {
 				if(pwdPassword.getText().equals("")) {
@@ -166,7 +171,7 @@ public class Login {
 		panelLogin.setBorder(null);
 		panelLogin.setBackground(new Color(105, 105, 105));
 		panelLogin.setBounds(166, 320, 300, 53);
-		frame.getContentPane().add(panelLogin);
+		contentPane.add(panelLogin);
 		panelLogin.setLayout(null);
 		
 		JButton btnNewButton = new JButton("Log In");
@@ -181,8 +186,12 @@ public class Login {
 		lblIconLogin.setBounds(171, 0, 53, 53);
 		lblIconLogin.setIcon(new ImageIcon(img_login));
 		panelLogin.add(lblIconLogin);
+		
+		lblLogin.setBounds(167, 290, 299, 20);
+		contentPane.add(lblLogin);
 		btnNewButton.addActionListener(new ActionListener() {
 			
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
 				
 				try {		
@@ -207,12 +216,12 @@ public class Login {
 						pstT.setTimestamp(1, timestamp);
 						pstT.setString(2, usernameField.getText());
 						pstT.executeUpdate();
-						frame.dispose();
+//						frame.dispose();
 						if(usernameField.getText().equals("admin")) {
 							JOptionPane.showMessageDialog(null, usernameField.getText());
 							Dashboard db = new Dashboard();
 							db.setVisible(true);
-							 userTransaksi="admin";   //ketika admin masuk, transaksi username berubah
+							userTransaksi="admin";   //ketika admin masuk, transaksi username berubah
 						}else {
 							DashboardKasir barang = new DashboardKasir();
 							barang.setVisible(true);
@@ -220,16 +229,15 @@ public class Login {
 						}
 							
 					}
+					else if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
+							lblLogin.setText("Please input all requirements above!");
+					}
 					
 					else {
 						salah = salah +1;
-						if (count == 0) {
-							
-							JOptionPane.showMessageDialog(null, "Username not found!");
-							
-						}
-						else {
-							if (salah==3){
+						
+						
+						if (salah==3){
 							RandomString random = new RandomString();
 							random.getRandom();
 							pwdPassword.setText(random.getRandom());
@@ -241,11 +249,13 @@ public class Login {
 							pstp.setString(2, usernameField.getText());
 							pstp.executeUpdate();
 							
-							}
-							else {
-								JOptionPane.showMessageDialog(null, "Invalid username or password!"  + salah);
-							}
+							//lblLogin.setText("Password have been reset automatically");
 						}
+						else {
+							lblLogin.setText("Invalid username or password! " + salah);
+								
+						}
+					
 							
 					}	
 					
@@ -257,6 +267,7 @@ public class Login {
 			}
 		});
 	}
+	
 	public class RandomString {
 	    private char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".toCharArray();
 	    private StringBuilder stringBuilder = new StringBuilder();
