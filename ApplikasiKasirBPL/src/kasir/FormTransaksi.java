@@ -13,6 +13,8 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.SystemColor;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,20 +26,35 @@ import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
+
 import com.toedter.calendar.JDateChooser;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.MatteBorder;
+import javax.swing.plaf.basic.BasicSpinnerUI;
+import javax.swing.text.DefaultFormatter;
+import javax.swing.border.CompoundBorder;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ChangeEvent;
+import java.awt.event.InputMethodListener;
+import java.awt.event.InputMethodEvent;
 
 public class FormTransaksi extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField noresiTField;
-	private static JTextField hargaTField;
-	private JSpinner jumlahTField;
+	private static JTextField noresiTField;
+	private static JSpinner jumlahTField_1;
+	private static JSpinner hargaTField;
 	private static JComboBox skuTField_1;
+	private static Integer getHarga,getHargaTotal,jumlah;
 	
 	/**
 	 * Launch the application.
@@ -49,7 +66,6 @@ public class FormTransaksi extends JFrame {
 			initialize();
 			autoIncrement();
 			dropdownSKU();
-			autoHarga();
 		}
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -63,13 +79,32 @@ public class FormTransaksi extends JFrame {
 			}
 		});
 	}
+	
+
 
 	/**
 	 * Create the frame.
 	 * @return 
+	 * @throws SQLException 
 	 */
+	
+	public void autoHarga() throws SQLException {   
+		
+		String s = (String) skuTField_1.getSelectedItem();
+		String sqlA = "SELECT harga_jual FROM barang WHERE sku = ?" ;
+		PreparedStatement pst = connection.prepareStatement(sqlA);
+		pst.setString(1, s);
+		ResultSet rsA = pst.executeQuery();
+		while(rsA.next()) {
+			 getHarga = rsA.getInt("harga_jual");
+			 jumlah = (Integer) jumlahTField_1.getValue();
+			 getHargaTotal = getHarga* jumlah;
+			 hargaTField.setValue(getHargaTotal);
+		}
+		
+	}
 
-	public void initialize(){
+	public void initialize() throws SQLException{
 		setTitle("Transaksi");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(FormTransaksi.class.getResource("/ico/tbinput.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -98,12 +133,12 @@ public class FormTransaksi extends JFrame {
 		noresiTField.setColumns(10);
 		
 	
-			JLabel labelNoResi = new JLabel("Nomor Resi");
-			labelNoResi.setForeground(Color.BLUE);
-			labelNoResi.setBackground(Color.WHITE);
-			labelNoResi.setFont(new Font("Segoe UI", Font.BOLD, 16));
-			labelNoResi.setBounds(314, 105, 131, 20);
-			contentPane.add(labelNoResi);
+		JLabel labelNoResi = new JLabel("Nomor Resi");
+		labelNoResi.setForeground(Color.BLUE);
+		labelNoResi.setBackground(Color.WHITE);
+		labelNoResi.setFont(new Font("Segoe UI", Font.BOLD, 16));
+		labelNoResi.setBounds(314, 105, 131, 20);
+		contentPane.add(labelNoResi);
 		
 		JLabel labelJumlah = new JLabel("Jumlah");
 		labelJumlah.setForeground(Color.BLUE);
@@ -112,24 +147,36 @@ public class FormTransaksi extends JFrame {
 		labelJumlah.setBounds(314, 293, 107, 27);
 		contentPane.add(labelJumlah);
 		
-		JSpinner jumlahTField_1 = new JSpinner();
+		jumlahTField_1 = new JSpinner();
+		jumlahTField_1.setBackground(Color.WHITE);
+		jumlahTField_1.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				try {
+						autoHarga();
+					
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		jumlahTField_1.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		jumlahTField_1.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
 		jumlahTField_1.setBounds(319, 329, 120, 53);
 		contentPane.add(jumlahTField_1);
 		
-		hargaTField = new JTextField();
-		hargaTField.setEditable(false);
-		hargaTField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-		hargaTField.setColumns(10);
-		hargaTField.setBounds(469, 328, 275, 53);
-		contentPane.add(hargaTField);
 		
 		skuTField_1 = new JComboBox();
+		skuTField_1.setMaximumRowCount(9);
 		skuTField_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
+            public void actionPerformed(ActionEvent arg0) {
+            	try {
+					 autoHarga();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+            	
+            }
+        });
 		skuTField_1.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 		skuTField_1.setBounds(314, 221, 430, 53);
 		contentPane.add(skuTField_1);
@@ -140,12 +187,23 @@ public class FormTransaksi extends JFrame {
 		btnInput.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { //menambahkan data di dua tabel 
 				try {
-					
-					String sqlT = "INSERT ";
-					PreparedStatement pstT = connection.prepareStatement(sqlT);
-					Timestamp timestamp = new Timestamp(new Date().getTime());   //tangggaltransaksi
-					//Login.userTransaksi
-					
+						String sqlT = "INSERT INTO transaksi (noresi, tanggal, username)VALUES (?,?,?)";
+						PreparedStatement pstT = connection.prepareStatement(sqlT);
+						Timestamp timestamp = new Timestamp(new Date().getTime());   //tangggaltransaksi
+						pstT.setString(1,noresiTField.getText());
+						pstT.setTimestamp(2, timestamp);
+						pstT.setString(3, Login.userTransaksi);
+						pstT.executeUpdate();
+						if(pstT.executeUpdate()==1) {
+						JOptionPane.showMessageDialog(null,"Transaksi Berhasil!");
+					}
+					if (Login.userTransaksi==null) {
+						JOptionPane.showMessageDialog(null,"Anda Salah Run Program, Silahkan Run Dari Login!!");
+					}
+					else {
+
+						JOptionPane.showMessageDialog(null,"Silahkan Isi Data Dengan Benar!!");
+					}
 					
 				} catch (SQLException e1) {
 					
@@ -155,6 +213,15 @@ public class FormTransaksi extends JFrame {
 				
 			}
 		});
+
+		hargaTField = new JSpinner();
+		hargaTField.setBackground(Color.WHITE);
+		hargaTField.setEditor(new JSpinner.DefaultEditor(hargaTField));
+		removeSpinner(hargaTField);
+		hargaTField.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		hargaTField.setBounds(479, 329, 265, 53);
+		contentPane.add(hargaTField);
+
 		btnInput.setForeground(Color.WHITE);
 		btnInput.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		btnInput.setBackground(Color.WHITE);
@@ -169,7 +236,6 @@ public class FormTransaksi extends JFrame {
 		btnKembali.setBorderPainted(false);
 		btnKembali.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
 				DashboardKasir transaksi = new DashboardKasir();
 				transaksi.setVisible(true);
 				dispose();
@@ -256,21 +322,20 @@ public class FormTransaksi extends JFrame {
 			}
 		
 	}
-	public void autoHarga() throws SQLException {  //masi error 
-													//menampilkan harga_jual pada database ketika sku dipilih dropdown
-		
-		String getHarga;				
-		String s = (String) skuTField_1.getSelectedItem();
-		String sqlA = "SELECT harga_jual FROM barang WHERE sku = ' "+s + "'" ;
-		PreparedStatement pst = connection.prepareStatement(sqlA);
-		ResultSet rsA = pst.executeQuery();
-		while(rsA.next()) {
-			getHarga = rsA.getString("harga_jual");
-		    skuTField_1.addActionListener(new ActionListener() {
-	            public void actionPerformed(ActionEvent arg0) {
-//	            	hargaTField.setText(getHarga);
-	            }
-	        });
-		}
-	}
+	public void removeSpinner(JSpinner hargaTField) {
+        Dimension d = hargaTField.getPreferredSize();
+        d.width = 30;
+        hargaTField.setUI(new BasicSpinnerUI() {
+            protected Component createNextButton() {
+                return null;
+            }
+
+            protected Component createPreviousButton() {
+                return null;
+            }
+        });
+        hargaTField.setPreferredSize(d);
+    }
+	
+
 }
