@@ -89,6 +89,7 @@ public class Dashboard extends JFrame {
 					try {
 						kelolaUser = new FormKelolaUser();
 						kelolaUser.setVisible(true);
+						dispose();
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -121,6 +122,7 @@ public class Dashboard extends JFrame {
 				try {
 					fkb = new FormKelolaBarang();
 					fkb.setVisible(true);
+					dispose();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -152,6 +154,7 @@ public class Dashboard extends JFrame {
 				
 					DashboardKasir db = new DashboardKasir();
 					db.setVisible(true);
+					dispose();
 			}
 		});
 		btnTransaksi.setForeground(Color.WHITE);
@@ -173,6 +176,11 @@ public class Dashboard extends JFrame {
 		panelLaporan.add(lblLaporan);
 		
 		JButton btnLaporan = new JButton("Pengelolaan Laporan");
+		btnLaporan.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		btnLaporan.setForeground(Color.WHITE);
 		btnLaporan.setBackground(SystemColor.controlDkShadow);
 		btnLaporan.setBounds(15, 44, 190, 29);
@@ -199,6 +207,7 @@ public class Dashboard extends JFrame {
 					try {
 						login = new Login();
 						login.setVisible(true);
+						dispose();
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

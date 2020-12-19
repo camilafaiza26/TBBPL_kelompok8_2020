@@ -34,8 +34,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import com.sun.xml.internal.messaging.saaj.soap.ver1_1.Envelope1_1Impl;
-
 import net.proteanit.sql.DbUtils;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;

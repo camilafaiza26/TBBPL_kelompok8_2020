@@ -39,7 +39,7 @@ public class Login extends JFrame {
 	private Image img_username = new ImageIcon (Login.class.getResource("/ico/lock.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_password = new ImageIcon (Login.class.getResource("/ico/keyhole.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_login = new ImageIcon (Login.class.getResource("/ico/enter.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-	static String userTransaksi;
+	static  String userTransaksi;
 	
 	/**
 	 * Launch the application.
@@ -216,16 +216,16 @@ public class Login extends JFrame {
 						pstT.setTimestamp(1, timestamp);
 						pstT.setString(2, usernameField.getText());
 						pstT.executeUpdate();
-//						frame.dispose();
 						if(usernameField.getText().equals("admin")) {
-							JOptionPane.showMessageDialog(null, usernameField.getText());
 							Dashboard db = new Dashboard();
 							db.setVisible(true);
+							dispose();
 							userTransaksi="admin";   //ketika admin masuk, transaksi username berubah
 						}else {
+							userTransaksi= usernameField.getText(); //ketika kasir masuk
 							DashboardKasir barang = new DashboardKasir();
 							barang.setVisible(true);
-							userTransaksi= usernameField.getText(); //ketika kasir masuk
+							dispose();
 						}
 							
 					}
