@@ -9,11 +9,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.Color;
+import java.awt.Dimension;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
 
 import javax.swing.JTextField;
 import javax.swing.JTable;
@@ -30,6 +33,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -39,38 +43,174 @@ import java.awt.event.KeyEvent;
 import javax.swing.SwingConstants;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.UIManager;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 public class FormKelolaBarang extends JFrame {
 
+	private FormRestockBarang restock;
+	private FormDetailBarang detail;
 	private JPanel contentPane;
 	private JFrame frame;
-	private static JTextField skuField;
-	private static JTextField namaField;
-	private static JTextField stockField;
-	private static JTextField harga_beliField;
-	private static JTextField harga_jualField;
-	private static JTextField cariField;
+	
+	private static JTextField skuField, namaField, cariField;
+	private static JButton btnAdd, btnPrint;
 	private static JTable tableBarang;
+	private static JSpinner spinnerStock, spinnerBeli, spinnerJual;
+	static Connection connection = null;
+	
+	private static PreparedStatement pst = null;
+	private static ResultSet rs = null;
+	private static Statement stmt = null;
 	
 	private Image img_barang = new ImageIcon (Dashboard.class.getResource("/ico/barang.png")).getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 	
-	//KONEKSI
-	static Connection connection = null;
+	//Constructor
 	public FormKelolaBarang() throws SQLException {
+		
+		setTitle("FORM DATA MASTER BARANG");
 		initialize();
 		connection = Koneksi.koneksiDB();
 		refreshTable();
+		
+		// mengambil ukuran layar
+        Dimension layar = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // membuat titik x dan y
+        int x = layar.width / 2  - this.getSize().width / 2;
+        int y = layar.height / 2 - this.getSize().height / 2;
+
+        this.setLocation(x, y);	
+		
 	}
 	
-	static ArrayList<Barang> listBarang = new ArrayList<>();
+	//Menampilkan Data
+	public static ArrayList<Barang> showData(){
+		
+		ArrayList<Barang> barang = new ArrayList<>();
+		try {
+			
+			Connection conn = (Connection)Koneksi.koneksiDB();
+			stmt = conn.createStatement();
+			String sql = "SELECT * FROM barang";
+			rs = stmt.executeQuery(sql);
+			
+			while(rs.next()) {
+				
+				barang.add(new Barang(rs.getString("sku"),
+									  rs.getString("nama"),
+									  rs.getInt("stock"), 
+									  rs.getInt("harga_beli"), 
+									  rs.getInt("harga_jual")));
+			
+			}
+			rs.close();
+			
+		} 
+		catch (Exception e) {
+			
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		
+		}
+		return barang;
+	}
+	
+	//Mencari Data
+	public static ArrayList<Barang> cariBarang(String key){
+		
+		ArrayList<Barang> barang = new ArrayList<>();
+		
+		try {
+			
+			Connection conn = (Connection)Koneksi.koneksiDB();
+			String sql="SELECT * FROM barang WHERE sku LIKE ? OR nama LIKE ? OR stock LIKE ? OR harga_jual LIKE ? OR harga_beli LIKE ?";
+			pst = conn.prepareStatement(sql);
+			
+			pst.setString(1, "%"+key+"%");
+			pst.setString(2, "%"+key+"%");
+			pst.setString(3, "%"+key+"%");
+			pst.setString(4, "%"+key+"%");
+			pst.setString(5, "%"+key+"%");
+			rs = pst.executeQuery();
+			
+			while(rs.next()) {
+				
+				barang.add(new Barang(rs.getString("sku"), 
+							rs.getString("nama"), 
+							rs.getInt("stock"),  
+							rs.getInt("harga_beli"), 
+							rs.getInt("harga_jual")));
+				
+			}
+			rs.close();
+			
+		}
+		catch(Exception e) {
+			
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			
+		}	
+		return barang;
+		
+	}
+	
+	//ambil data barang
+	public Barang ambilDataBarang(String sku) {
+		
+		Barang brg = null;
+		
+		try {
+			
+			Connection conn = (Connection)Koneksi.koneksiDB();
+			String sql = "SELECT * FROM barang WHERE sku= ? ";
+			pst = conn.prepareStatement(sql);
+			pst.setString(1, sku);
+			rs = pst.executeQuery();
+			
+			if(rs.next()) {
+				
+				brg = new Barang( rs.getString("sku"), rs.getString("nama"), rs.getInt("stock"), rs.getInt("harga_beli"), rs.getInt("harga_jual"));
+			
+			}
+			else {
+				
+				brg = null;
+				rs.close();
+				
+			}
+			
+		} 
+		catch (Exception e) {
+			
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			
+		}
+		
+		return brg;	
+	}
+	
+	//Menampilkan seluruh data 
 	public static void refreshTable() throws SQLException {
 		
-		String sql = "Select * from barang";
-		PreparedStatement pst = connection.prepareStatement(sql);
-		ResultSet rs = pst.executeQuery();
-		tableBarang.setModel(DbUtils.resultSetToTableModel(rs));
-		pst.close();
-		rs.close();
+		ArrayList <Barang> list = showData();
+		DefaultTableModel tb = new DefaultTableModel();
+		
+		tb.addColumn("SKU");
+		tb.addColumn("NAMA BARANG");
+		tb.addColumn("JUMLAH STOCK");
+		tb.addColumn("HARGA BELI");
+		tb.addColumn("HARGA JUAL");
+		tableBarang.setModel(tb);
+		
+		for(Barang brg : list){
+            
+           tb.addRow(new Object[] {
+        		   
+             brg.getSku(),brg.getNama(), brg.getStock(), brg.getHarga_beli(), brg.getHarga_jual()
+             
+           });
+		}
 		
 	}
 	
@@ -78,9 +218,13 @@ public class FormKelolaBarang extends JFrame {
 	
 		skuField.setText("");
 		namaField.setText("");
-		stockField.setText("");
-		harga_beliField.setText("");
-		harga_jualField.setText("");
+		spinnerStock.setValue(0);
+		spinnerBeli.setValue(0);
+		spinnerJual.setValue(0);
+		spinnerStock.setEnabled(true);
+		skuField.enable();
+		btnAdd.setEnabled(true);
+		btnPrint.setEnabled(true);
 		
 	}
 	// rs2xml.jar
@@ -91,10 +235,14 @@ public class FormKelolaBarang extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					
 					FormKelolaBarang frame = new FormKelolaBarang();
 					frame.setVisible(true);
+					
 				} catch (Exception e) {
-					e.printStackTrace();
+					
+					JOptionPane.showMessageDialog(null, e.getMessage());
+					
 				}
 			}
 		});
@@ -105,7 +253,7 @@ public class FormKelolaBarang extends JFrame {
 	 */
 	private void initialize(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 1130, 640);
+		setBounds(0, 0, 1112, 682);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -114,180 +262,94 @@ public class FormKelolaBarang extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(211, 211, 211));
 		panel.setBorder(null);
-		panel.setBounds(0, 0, 1273, 656);
+		panel.setBounds(0, 0, 1106, 650);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent e) {
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-			}
 		});
 		panel_2.setBackground(new Color(105, 105, 105));
 		panel_2.setBorder(null);
-		panel_2.setBounds(0, 0, 330, 594);
+		panel_2.setBounds(0, 0, 330, 650);
 		panel.add(panel_2);
 		panel_2.setLayout(null);
 		
 		skuField = new JTextField();
 		skuField.addFocusListener(new FocusAdapter() {
 			public void focusGained(FocusEvent arg0) {
-				if(skuField.getText().equals("SKU")) {
-					skuField.setText("");
-				}
-				else {
-					skuField.selectAll();
-				}
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				if(skuField.getText().equals("")) {
-					skuField.setText("SKU");
-				}
 			}
 		});
-		skuField.setText("SKU");
-		skuField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		skuField.setFont(new Font("Tahoma", Font.BOLD, 14));
 		skuField.setBackground(new Color(255, 255, 255));
-		skuField.setBounds(52, 154, 196, 32);
+		skuField.setBounds(52, 141, 196, 23);
 		panel_2.add(skuField);
 		skuField.setColumns(10);
 		
 		namaField = new JTextField();
 		namaField.addFocusListener(new FocusAdapter() {
 			public void focusGained(FocusEvent arg0) {
-				if(namaField.getText().equals("Nama Barang")) {
-					namaField.setText("");
-				}
-				else {
-					namaField.selectAll();
-				}
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				if(namaField.getText().equals("")) {
-					namaField.setText("Nama Barang");
-				}
 			}
 		});
-		namaField.setText("Nama Barang");
-		namaField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		namaField.setFont(new Font("Tahoma", Font.BOLD, 14));
 		namaField.setBackground(new Color(255, 255, 255));
 		namaField.setColumns(10);
-		namaField.setBounds(52, 202, 196, 32);
+		namaField.setBounds(52, 198, 196, 23);
 		panel_2.add(namaField);
-		
-		stockField = new JTextField();
-		stockField.addFocusListener(new FocusAdapter() {
-			public void focusGained(FocusEvent arg0) {
-				if(stockField.getText().equals("Stock Barang")) {
-					stockField.setText("");
-				}
-				else {
-					stockField.selectAll();
-				}
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				if(stockField.getText().equals("")) {
-					stockField.setText("Stock Barang");
-				}
-			}
-		});
-		stockField.setText("Stock Barang");
-		stockField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		stockField.setBackground(new Color(255, 255, 255));
-		stockField.setColumns(10);
-		stockField.setBounds(52, 250, 196, 32);
-		panel_2.add(stockField);
-		
-		harga_beliField = new JTextField();
-		harga_beliField.addFocusListener(new FocusAdapter() {
-			public void focusGained(FocusEvent arg0) {
-				if(harga_beliField.getText().equals("Harga Beli")) {
-					harga_beliField.setText("");
-				}
-				else {
-					harga_beliField.selectAll();
-				}
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				if(harga_beliField.getText().equals("")) {
-					harga_beliField.setText("Harga Beli");
-				}
-			}
-		});
-		harga_beliField.setText("Harga Beli");
-		harga_beliField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		harga_beliField.setBackground(new Color(255, 255, 255));
-		harga_beliField.setColumns(10);
-		harga_beliField.setBounds(52, 298, 196, 32);
-		panel_2.add(harga_beliField);
-		
-		harga_jualField = new JTextField();
-		harga_jualField.addFocusListener(new FocusAdapter() {
-			public void focusGained(FocusEvent arg0) {
-				if(harga_jualField.getText().equals("Harga Jual")) {
-					harga_jualField.setText("");
-				}
-				else {
-					harga_jualField.selectAll();
-				}
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				if(harga_jualField.getText().equals("")) {
-					harga_jualField.setText("Harga Jual");
-				}
-			}
-		});
-		harga_jualField.setText("Harga Jual");
-		harga_jualField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		harga_jualField.setBackground(new Color(255, 255, 255));
-		harga_jualField.setColumns(10);
-		harga_jualField.setBounds(52, 346, 196, 32);
-		panel_2.add(harga_jualField);
 		
 		JLabel lblNewLabel_1 = new JLabel("");
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1.setBounds(0, 24, 330, 105);
+		lblNewLabel_1.setBounds(0, 11, 330, 105);
 		lblNewLabel_1.setIcon(new ImageIcon(img_barang));
 		panel_2.add(lblNewLabel_1);
 		
-		JButton btnAdd = new JButton("ADD");
+		btnAdd = new JButton("ADD");
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				String sql = "INSERT INTO barang (sku, nama, stock, harga_beli, harga_jual) VALUES(?, ?, ?, ?, ?)";
-				
 				try {
 					
-					PreparedStatement statement = connection.prepareStatement(sql);
-					statement.setString(1, skuField.getText());
-					statement.setString(1, skuField.getText());
-					statement.setString(2, namaField.getText());
-					statement.setInt(3, Integer.parseInt(stockField.getText()));
-					statement.setInt(4, Integer.parseInt(harga_beliField.getText()));
-					statement.setInt(5, Integer.parseInt(harga_jualField.getText()));
-					statement.executeUpdate();
-					JOptionPane.showMessageDialog(null, "Data Berhasil Masuk");
-					refreshTable();
-					clearField();
+					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
+						spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+						
+						JOptionPane.showMessageDialog(null, "MASIH TERDAPAT DATA BARANG YANG BELUM DIISI");
+						
+					}else{
+						
+						if((int) spinnerBeli.getValue() <= (int) spinnerJual.getValue()) {
+						
+							String sql = "INSERT INTO barang VALUES(?, ?, ?, ?, ?)";
+							PreparedStatement statement = connection.prepareStatement(sql);
+							statement.setString(1, skuField.getText());
+							statement.setString(2, namaField.getText());
+							statement.setInt(3, (int) spinnerStock.getValue());
+							statement.setInt(4, (int) spinnerBeli.getValue());
+							statement.setInt(5, (int) spinnerJual.getValue());
+							statement.executeUpdate();
+							
+							JOptionPane.showMessageDialog(null, "DATA BERHASIL DITAMBAHKAN");
+							
+						}else {
+							
+							JOptionPane.showMessageDialog(null, "MASUKKAN HARGA DENGAN BENAR");
+							
+						}
+						
+						refreshTable();
+						clearField();
+						
+					}
+					
 				}catch(SQLException e1) {
 					
-					JOptionPane.showMessageDialog(null, "Koneksi Database Gagal");
+					JOptionPane.showMessageDialog(null, e1.getMessage());
 					
 				}
 				
 			}
 		});
 		btnAdd.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnAdd.setBounds(47, 416, 88, 33);
+		btnAdd.setBounds(47, 416, 106, 33);
 		panel_2.add(btnAdd);
 		
 		JButton btnEdit_1 = new JButton("EDIT");
@@ -296,28 +358,51 @@ public class FormKelolaBarang extends JFrame {
 				
 				try {
 					
-					String sql = "UPDATE barang SET nama =?, harga_beli=?, harga_jual=? WHERE sku=?";
-					PreparedStatement statement = connection.prepareStatement(sql);
-	
-					statement.setString(4, skuField.getText());
-					statement.setString(1, namaField.getText());
-					statement.setInt(2, Integer.parseInt(harga_beliField.getText()));
-					statement.setInt(3, Integer.parseInt(harga_jualField.getText()));
-					statement.executeUpdate();
-					JOptionPane.showMessageDialog(null, "Data Berhasil Diupdate!");
-					refreshTable();
-					clearField();
+					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
+						spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+							
+						JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DIEDIT");
+							
+					}else{
+						
+						if((int) spinnerBeli.getValue() <= (int) spinnerJual.getValue()) {
+					
+							int confirm = JOptionPane.showConfirmDialog(null, "Apakah anda yakin ingin mengubah data tersebut?", "Konfirmasi", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+							if(confirm ==  0) {
+								
+								String sql = "UPDATE barang SET nama =?, harga_beli=?, harga_jual=? WHERE sku=?";
+								PreparedStatement statement = connection.prepareStatement(sql);
+				
+								statement.setString(4, skuField.getText());
+								statement.setString(1, namaField.getText());
+								statement.setInt(2, (int) spinnerBeli.getValue());
+								statement.setInt(3, (int) spinnerJual.getValue());
+								statement.executeUpdate();
+								JOptionPane.showMessageDialog(null, "DATA BERHASIL DIUPDATE");
+								
+							}
+						
+						}else {
+							
+							JOptionPane.showMessageDialog(null, "MASUKKAN HARGA DENGAN BENAR");
+							
+						}
+						
+						refreshTable();
+						clearField();
+						
+					}
 					
 				}catch(SQLException e1) {
 					
-					JOptionPane.showMessageDialog(null, "Koneksi Database Gagal");
+					JOptionPane.showMessageDialog(null, e1.getMessage());
 					
 				}
 				
 			}
 		});
 		btnEdit_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnEdit_1.setBounds(163, 416, 79, 33);
+		btnEdit_1.setBounds(163, 416, 85, 33);
 		panel_2.add(btnEdit_1);
 		
 		JButton btnDelete = new JButton("DELETE");
@@ -326,27 +411,39 @@ public class FormKelolaBarang extends JFrame {
 				
 				try {
 					
-					String sql = "DELETE FROM barang WHERE sku = ?";
-					PreparedStatement statement = connection.prepareStatement(sql);
-					statement.setString(1, skuField.getText());
-					statement.execute();
-					JOptionPane.showMessageDialog(null, "Data Berhasil Dihapus");
-					refreshTable();
-					clearField();
+					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
+							spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+								
+							JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DIHAPUS");
+								
+					}else{
+						
+						int confirm = JOptionPane.showConfirmDialog(null, "Apakah anda yakin ingin menghapus data tersebut?", "Konfirmasi", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						if(confirm ==  0) {
+							String sql = "DELETE FROM barang WHERE sku = ?";
+							PreparedStatement statement = connection.prepareStatement(sql);
+							statement.setString(1, skuField.getText());
+							statement.execute();
+							JOptionPane.showMessageDialog(null, "DATA BERHASIL DIHAPUS");
+							refreshTable();
+							clearField();
+						}
+						
+					}
 					
 				}catch(SQLException e1) {
 					
-					JOptionPane.showMessageDialog(null, "Koneksi Database Gagal");
+					JOptionPane.showMessageDialog(null, e1.getMessage());
 					
 				}
 				
 			}
 		});
 		btnDelete.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnDelete.setBounds(47, 464, 88, 33);
+		btnDelete.setBounds(47, 464, 106, 33);
 		panel_2.add(btnDelete);
 		
-		JButton btnPrint = new JButton("PRINT");
+		btnPrint = new JButton("PRINT");
 		btnPrint.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
@@ -355,117 +452,204 @@ public class FormKelolaBarang extends JFrame {
 					tableBarang.print();
 					
 				}catch(java.awt.print.PrinterException eb){
-					System.err.format("Terjadi kesalahan pada printer", eb.getMessage());
+					
+					JOptionPane.showMessageDialog(null, eb.getMessage());
+					
 				}
 				
 			}
 		});
 		btnPrint.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnPrint.setBounds(163, 464, 81, 33);
+		btnPrint.setBounds(163, 464, 85, 33);
 		panel_2.add(btnPrint);
 		
 		JButton btnRestock = new JButton("RESTOCK");
 		btnRestock.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				
+				try {
+					
+					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
+							spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+								
+							JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DIRESTOCK");
+								
+					}else{
+						
+						int rowIndex = tableBarang.getSelectedRow();
+						String sku = tableBarang.getValueAt(rowIndex, 0).toString();
+						Barang b = ambilDataBarang(sku);	
+						
+						restock = new FormRestockBarang();
+						restock.pindahDataForm(b);
+						restock.setVisible(true);
+						dispose();
+						
+						try {
+							
+							refreshTable();
+							
+						} catch (SQLException e1) {
+	
+							JOptionPane.showMessageDialog(null, e1.getMessage());
+							
+						}
+					
+					}
+				}catch(SQLException e1) {
+					JOptionPane.showMessageDialog(null, e1.getMessage());
+				}
 				
 			}
 		});
 		btnRestock.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnRestock.setBounds(46, 514, 96, 33);
+		btnRestock.setBounds(46, 514, 106, 33);
 		panel_2.add(btnRestock);
 		
-		JButton btnExit = new JButton("BACK");
-		btnExit.addActionListener(new ActionListener() {
+		JButton btnBack = new JButton("BACK");
+		btnBack.setBounds(24, 588, 85, 33);
+		panel_2.add(btnBack);
+		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				frame = new JFrame();
 				if(JOptionPane.showConfirmDialog(frame, "Apakah Anda Yakin Untuk keluar ?", "Confirm to leave page", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_NO_OPTION) {
 					
-//					System.exit(0); GANTI
+					Dashboard dashboard = new Dashboard();
+					dashboard.setVisible(true);
+					dispose();
 					
 				}
 				
 			}
 		});
-		btnExit.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnExit.setBounds(167, 512, 79, 33);
-		panel_2.add(btnExit);
+		btnBack.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		
+		JButton btnNewButton = new JButton("DETAIL");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					
+					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
+							spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+								
+							JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DILIHAT");
+								
+					}else{
+						
+						int rowIndex = tableBarang.getSelectedRow();
+						String sku = tableBarang.getValueAt(rowIndex, 0).toString();
+						Barang b = ambilDataBarang(sku);	
+						
+						detail = new FormDetailBarang();
+						detail.pindahDataForm(b);
+						detail.setVisible(true);
+						dispose();
+						
+						try {
+							
+							refreshTable();
+							
+						} catch (SQLException e1) {
+	
+							JOptionPane.showMessageDialog(null, e1.getMessage());
+							
+						}
+					
+					}
+				}catch(SQLException e1) {
+					JOptionPane.showMessageDialog(null, e1.getMessage());
+				}
+				
+			}
+		});
+		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnNewButton.setBounds(163, 516, 89, 32);
+		panel_2.add(btnNewButton);
+		
+		JLabel lblNewLabel_2 = new JLabel("SKU");
+		lblNewLabel_2.setForeground(new Color(255, 255, 204));
+		lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2.setBounds(52, 116, 63, 14);
+		panel_2.add(lblNewLabel_2);
+		
+		JLabel lblNewLabel_2_1 = new JLabel("NAMA BARANG");
+		lblNewLabel_2_1.setForeground(new Color(255, 255, 204));
+		lblNewLabel_2_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2_1.setBounds(52, 175, 113, 14);
+		panel_2.add(lblNewLabel_2_1);
+		
+		spinnerStock = new JSpinner();
+		spinnerStock.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
+		spinnerStock.setFont(new Font("Tahoma", Font.BOLD, 14));
+		spinnerStock.setBounds(52, 255, 196, 23);
+		panel_2.add(spinnerStock);
+		
+		JLabel lblNewLabel_2_1_1 = new JLabel("JUMLAH STOCK");
+		lblNewLabel_2_1_1.setForeground(new Color(255, 255, 204));
+		lblNewLabel_2_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2_1_1.setBounds(52, 232, 113, 14);
+		panel_2.add(lblNewLabel_2_1_1);
+		
+		JLabel lblNewLabel_2_1_1_1 = new JLabel("HARGA BELI");
+		lblNewLabel_2_1_1_1.setForeground(new Color(255, 255, 204));
+		lblNewLabel_2_1_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2_1_1_1.setBounds(52, 285, 113, 14);
+		panel_2.add(lblNewLabel_2_1_1_1);
+		
+		spinnerBeli = new JSpinner();
+		spinnerBeli.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
+		spinnerBeli.setFont(new Font("Tahoma", Font.BOLD, 14));
+		spinnerBeli.setBounds(52, 310, 196, 23);
+		panel_2.add(spinnerBeli);
+		
+		spinnerJual = new JSpinner();
+		spinnerJual.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
+		spinnerJual.setFont(new Font("Tahoma", Font.BOLD, 14));
+		spinnerJual.setBounds(52, 368, 196, 23);
+		panel_2.add(spinnerJual);
+		
+		JLabel lblNewLabel_2_1_1_1_1 = new JLabel("HARGA JUAL");
+		lblNewLabel_2_1_1_1_1.setForeground(new Color(255, 255, 204));
+		lblNewLabel_2_1_1_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2_1_1_1_1.setBounds(52, 344, 113, 14);
+		panel_2.add(lblNewLabel_2_1_1_1_1);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(null);
 		panel_3.setBackground(new Color(211, 211, 211));
-		panel_3.setBounds(329, 211, 765, 363);
+		panel_3.setBounds(329, 168, 767, 455);
 		panel.add(panel_3);
 		panel_3.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(21, 25, 771, 314);
+		scrollPane.setBounds(10, 11, 747, 433);
 		panel_3.add(scrollPane);
 		
 		tableBarang = new JTable();
+		tableBarang.setRowHeight(30);
+		scrollPane.setViewportView(tableBarang);
 		tableBarang.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				
-				try {
-					
-					int row = tableBarang.getSelectedRow();
-					String sku = (tableBarang.getModel().getValueAt(row, 0)).toString();
+				int rowIndex = tableBarang.getSelectedRow();
+				String sku = tableBarang.getValueAt(rowIndex, 0).toString();
+				Barang b = ambilDataBarang(sku);	
+				skuField.setText(b.getSku());
+				namaField.setText(b.getNama());
+				spinnerStock.setValue(b.getStock());
+				spinnerBeli.setValue(b.getHarga_beli());
+				spinnerJual.setValue(b.getHarga_jual());
 				
-					String sql = "Select * from barang where sku = '"+sku+"' ";
-					PreparedStatement pst;
-					pst = connection.prepareStatement(sql);
-					ResultSet rs = pst.executeQuery();
-					while(rs.next()) {
-						skuField.setText(rs.getString("sku"));
-						namaField.setText(rs.getString("nama"));
-						stockField.setText(rs.getString("stock"));
-						harga_beliField.setText(rs.getString("harga_beli"));
-						harga_jualField.setText(rs.getString("harga_jual"));
-					}
-					
-					stockField.disable();
-					btnAdd.setEnabled(false);
-					
-				}catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-//				pst.close();
-//				rs.close();
+				spinnerStock.setEnabled(false);
+				skuField.disable();
+				btnAdd.setEnabled(false);
+				btnPrint.setEnabled(false);
 			}
+			
 		});
-		tableBarang.setBackground(new Color(211, 211, 211));
-		tableBarang.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		tableBarang.setFillsViewportHeight(true);
-		tableBarang.setForeground(new Color(0, 0, 0));
-		tableBarang.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		tableBarang.setModel(new DefaultTableModel(
-			new Object[][] {
-				{"1", "21", new Integer(21), new Integer(21), new Integer(21)},
-				{"12", "12", new Integer(12), new Integer(12), new Integer(12)},
-				{"2", "2", new Integer(2), new Integer(2), new Integer(2)},
-				{"34", "56", new Integer(78), new Integer(900), new Integer(90)},
-				{"4", "4", new Integer(4), new Integer(4), new Integer(4)},
-				{"B-1", "Ikan2", new Integer(90), new Integer(30000), new Integer(40000)},
-			},
-			new String[] {
-				"SKU", "nama", "stock", "harga_beli", "harga_jual"
-			}
-		));
-		tableBarang.getColumnModel().getColumn(0).setPreferredWidth(110);
-		tableBarang.getColumnModel().getColumn(0).setMinWidth(20);
-		tableBarang.getColumnModel().getColumn(1).setPreferredWidth(172);
-		tableBarang.getColumnModel().getColumn(1).setMinWidth(20);
-		tableBarang.getColumnModel().getColumn(2).setPreferredWidth(110);
-		tableBarang.getColumnModel().getColumn(2).setMinWidth(20);
-		tableBarang.getColumnModel().getColumn(3).setPreferredWidth(125);
-		tableBarang.getColumnModel().getColumn(3).setMinWidth(20);
-		tableBarang.getColumnModel().getColumn(4).setPreferredWidth(125);
-		tableBarang.getColumnModel().getColumn(4).setMinWidth(20);
-		scrollPane.setViewportView(tableBarang);
 		
 		cariField = new JTextField();
 		cariField.addFocusListener(new FocusAdapter() {
@@ -491,18 +675,46 @@ public class FormKelolaBarang extends JFrame {
 			public void keyReleased(KeyEvent e) {
 				
 				try {
-					String sql="SELECT * FROM barang WHERE sku LIKE ? OR nama LIKE ?";
-					PreparedStatement statement = connection.prepareStatement(sql);
 					
-					statement.setString(1, "%"+cariField.getText()+"%");
-					statement.setString(2, "%"+cariField.getText()+"%");
-					ResultSet rs = statement.executeQuery();
-					tableBarang.setModel(DbUtils.resultSetToTableModel(rs));
+						ArrayList<Barang> list = cariBarang(cariField.getText());
+						DefaultTableModel tb = new DefaultTableModel();
+						
+						//Judul Kolom
+						tb.addColumn("SKU");
+						tb.addColumn("NAMA BARANG");
+						tb.addColumn("JUMLAH STOK");
+						tb.addColumn("HARGA BELI");
+						tb.addColumn("HARGA JUAL");
+						tableBarang.setModel(tb);
+						
+						for(Barang brg : list){
+				            
+				           tb.addRow(new Object[] {
+				             brg.getSku(),brg.getNama(), brg.getStock(), brg.getHarga_beli(), brg.getHarga_jual()
+				           });
+				           
+						}
+						
+						if(list.size() == 0){
+							
+							JOptionPane.showMessageDialog(null, "DATA TIDAK DITEMUKAN");
+							cariField.setText("Pencarian");
+							try {
+								
+								refreshTable();
+								
+							} catch (SQLException e1) {
+								
+								JOptionPane.showMessageDialog(null, e1.getMessage());
+								
+							}
+						}
 					
 					
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				} catch (Exception e1) {
+
+					JOptionPane.showMessageDialog(null, e1.getMessage());
+					
 				}
 				
 			}
@@ -510,10 +722,10 @@ public class FormKelolaBarang extends JFrame {
 			public void keyPressed(KeyEvent e) {
 			}
 		});
-		cariField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		cariField.setFont(new Font("Tahoma", Font.BOLD, 14));
 		cariField.setColumns(10);
 		cariField.setBackground(Color.WHITE);
-		cariField.setBounds(350, 163, 196, 32);
+		cariField.setBounds(353, 134, 142, 23);
 		panel.add(cariField);
 		
 		JLabel lblNewLabel = new JLabel("Data Master Barang");
