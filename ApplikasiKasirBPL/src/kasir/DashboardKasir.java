@@ -1,6 +1,8 @@
 package kasir;
 
 
+
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -73,6 +75,67 @@ public class DashboardKasir extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
+		JLabel lblMenuUtama = new JLabel("Menu Utama");
+		lblMenuUtama.setHorizontalAlignment(SwingConstants.CENTER);
+		lblMenuUtama.setFont(new Font("Segoe UI", Font.BOLD, 18));
+		lblMenuUtama.setBounds(664, 363, 156, 35);
+		contentPane.add(lblMenuUtama);
+		
+		JLabel lblLogOut = new JLabel("Log Out");
+		lblLogOut.setHorizontalAlignment(SwingConstants.CENTER);
+		lblLogOut.setFont(new Font("Segoe UI", Font.BOLD, 18));
+		lblLogOut.setBounds(493, 363, 156, 35);
+		contentPane.add(lblLogOut);
+		
+		JButton btntransaksi_2_1 = new JButton("");
+		btntransaksi_2_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				if(Login.userTransaksi.equals("admin"))
+				{
+					Dashboard d = new Dashboard();
+					d.setVisible(true);
+					dispose();
+				}
+				else {
+					
+					JOptionPane.showMessageDialog(null,"Maaf, Anda Bukan Admin!!");
+				}
+			}});
+		btntransaksi_2_1.setIcon(new ImageIcon(DashboardKasir.class.getResource("/ico/tbdash.png")));
+		btntransaksi_2_1.setOpaque(false);
+		btntransaksi_2_1.setFont(new Font("Segoe UI", Font.BOLD, 20));
+		btntransaksi_2_1.setContentAreaFilled(false);
+		btntransaksi_2_1.setBorderPainted(false);
+		btntransaksi_2_1.setBounds(674, 251, 126, 117);
+		contentPane.add(btntransaksi_2_1);
+		
+		JButton btntransaksi_2 = new JButton("");
+		btntransaksi_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				if(JOptionPane.showConfirmDialog(null, "Apakah Anda Yakin Untuk keluar ?", "Confirm to leave page", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_NO_OPTION) {
+					Login login;
+					try {
+						login = new Login();
+						login.setVisible(true);
+						dispose();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					}
+			}
+		});
+		btntransaksi_2.setIcon(new ImageIcon(DashboardKasir.class.getResource("/ico/tblogout.png")));
+		btntransaksi_2.setOpaque(false);
+		btntransaksi_2.setFont(new Font("Segoe UI", Font.BOLD, 20));
+		btntransaksi_2.setContentAreaFilled(false);
+		btntransaksi_2.setBorderPainted(false);
+		btntransaksi_2.setBounds(505, 251, 126, 117);
+		contentPane.add(btntransaksi_2);
+		
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(null);
@@ -81,29 +144,6 @@ public class DashboardKasir extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-		JButton btnlogout = new JButton("LOG OUT");
-		btnlogout.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					if(JOptionPane.showConfirmDialog(null, "Apakah Anda Yakin Untuk keluar ?", "Confirm to leave page", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_NO_OPTION) {
-					Login login = new Login();
-					login.setVisible(true);
-					dispose();
-					}
-					
-				} catch (SQLException e1) {
-					
-					e1.printStackTrace();
-				}
-				
-			}
-		});
-		btnlogout.setForeground(Color.BLACK);
-		btnlogout.setBounds(0, 442, 336, 52);
-		panel.add(btnlogout);
-		btnlogout.setBackground(Color.WHITE);
-		btnlogout.setFont(new Font("Segoe UI", Font.BOLD, 16));
-		
 		JCalendar calendar = new JCalendar();
 		calendar.getMonthChooser().getComboBox().setBackground(Color.WHITE);
 		calendar.getDayChooser().getDayPanel().setBorder(null);
@@ -111,7 +151,7 @@ public class DashboardKasir extends JFrame {
 		calendar.getYearChooser().getSpinner().setFont(new Font("Segoe UI", Font.BOLD, 16));
 		calendar.getMonthChooser().getComboBox().setFont(new Font("Segoe UI", Font.BOLD, 16));
 		calendar.setBorder(new EmptyBorder(0, 0, 0, 0));
-		calendar.setBounds(49, 219, 233, 190);
+		calendar.setBounds(48, 232, 233, 203);
 		panel.add(calendar);
 		
 		JLabel iconkasir = new JLabel("New label");
@@ -160,7 +200,7 @@ public class DashboardKasir extends JFrame {
 		btntransaksi.setOpaque(false);
 		btntransaksi.setContentAreaFilled(false);
 		btntransaksi.setBorderPainted(false);
-		btntransaksi.setBounds(682, 138, 178, 165);
+		btntransaksi.setBounds(679, 82, 121, 117);
 		contentPane.add(btntransaksi);
 		
 		JButton btntransaksi_1 = new JButton("");
@@ -186,19 +226,19 @@ public class DashboardKasir extends JFrame {
 		btntransaksi_1.setOpaque(false);
 		btntransaksi_1.setContentAreaFilled(false);
 		btntransaksi_1.setBorderPainted(false);
-		btntransaksi_1.setBounds(455, 138, 178, 165);
+		btntransaksi_1.setBounds(505, 82, 126, 117);
 		contentPane.add(btntransaksi_1);
 		
 		JLabel lblInputTransaksi = new JLabel("Input Transaksi");
 		lblInputTransaksi.setHorizontalAlignment(SwingConstants.CENTER);
 		lblInputTransaksi.setFont(new Font("Segoe UI", Font.BOLD, 18));
-		lblInputTransaksi.setBounds(465, 307, 156, 35);
+		lblInputTransaksi.setBounds(493, 205, 156, 35);
 		contentPane.add(lblInputTransaksi);
 		
 		JLabel lblTableTransaksi = new JLabel("Table Transaksi");
 		lblTableTransaksi.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTableTransaksi.setFont(new Font("Segoe UI", Font.BOLD, 18));
-		lblTableTransaksi.setBounds(697, 309, 156, 30);
+		lblTableTransaksi.setBounds(664, 205, 156, 30);
 		contentPane.add(lblTableTransaksi);
 		
 		JLabel lblNewLabel = new JLabel("");

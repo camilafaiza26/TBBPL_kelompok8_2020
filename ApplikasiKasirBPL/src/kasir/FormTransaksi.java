@@ -1,6 +1,8 @@
 package kasir;
 
 
+
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -49,6 +51,10 @@ import java.awt.event.InputMethodEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.Cursor;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class FormTransaksi extends JFrame {
 
@@ -58,7 +64,8 @@ public class FormTransaksi extends JFrame {
 	private static JSpinner hargaTField;
 	private static JComboBox skuTField_1;
 	private static JTextField namaField;
-	private static Integer getHarga,getHargaTotal,jumlah,getStock,getStockBeli;
+	private static Integer getHarga,getHargaTotal,jumlah,getStock,getSisaStock;
+
 	
 	/**
 	 * Launch the application.
@@ -70,6 +77,7 @@ public class FormTransaksi extends JFrame {
 			initialize();
 			autoIncrement();
 			dropdownSKU();
+			autoHarga();
 		}
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -88,7 +96,6 @@ public class FormTransaksi extends JFrame {
 
 	/**
 	 * Create the frame.
-	 * @return 
 	 * @throws SQLException 
 	 */
 	
@@ -103,23 +110,25 @@ public class FormTransaksi extends JFrame {
 			 String getNama = rsA.getString("nama");
 			 namaField.setText(getNama);
 			 
-			 jumlah = (Integer) jumlahTField_1.getValue();		//jumlah : didapat dari field jumlah 
+			 jumlah = (Integer) jumlahTField_1.getValue();		//jumlah : didapat dari field jumlah (yangdibeli)
 			 													//getStock : didapat dari stock database
 			 													//getStockBeli : didapat dari stock database-jumlah
 			 getStock = rsA.getInt("stock");
-			 getStockBeli=getStock-jumlah;
+			 getSisaStock=getStock-jumlah;
 			 if(getStock==0) {
 				 JOptionPane.showMessageDialog(null, "Maaf Stock Kosong");
 			 }
 			 else if(getStock<jumlah) {
 				 JOptionPane.showMessageDialog(null, "Maaf, Stock Terbatas!!");
+				 jumlahTField_1.setValue(getStock);		//balik lagee
 			 }
-			 else {
-			 stokField.setValue(getStockBeli);	
-			 }
+			 else if(getStock>=jumlah){
+			 stokField.setValue(getSisaStock);	
 			 getHarga = rsA.getInt("harga_jual");
 			 getHargaTotal = getHarga* jumlah;
 			 hargaTField.setValue(getHargaTotal);
+			 } 
+			 
 			 
 		}
 		
@@ -147,8 +156,6 @@ public class FormTransaksi extends JFrame {
 		lblNoResi.setBackground(Color.WHITE);
 		lblNoResi.setBounds(314, 121, 131, 20);
 		contentPane.add(lblNoResi);
-		
-		
 
 		JLabel labelTransaksi = new JLabel("Transaksi.");
 		labelTransaksi.setForeground(Color.WHITE);
@@ -216,6 +223,7 @@ public class FormTransaksi extends JFrame {
 		contentPane.add(noResiTField);
 		
 		skuTField_1 = new JComboBox();
+		skuTField_1.setToolTipText("");
 		skuTField_1.setOpaque(false);
 		skuTField_1.setMaximumRowCount(9);
 		skuTField_1.addActionListener(new ActionListener() {
@@ -282,32 +290,72 @@ public class FormTransaksi extends JFrame {
 		btnInput.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { //menambahkan data di dua tabel 
 				try {
-						
+					
 					if (Login.userTransaksi==null) {
 						JOptionPane.showMessageDialog(null,"Anda Salah Run Program, Silahkan Run Dari Login!!");
 					}
-//					else if (getH) {
-//						JOptionPane.showMessageDialog(null,"Silahkan Isi Data Dengan Benar!!");
-//					}
+					else if (getSisaStock==0) {
+						JOptionPane.showMessageDialog(null,"Maaf, Stock Habis!!");
+					}
 					else {
+						
 						String s = (String) skuTField_1.getSelectedItem();
-						String sqlT = "INSERT INTO transaksi (noresi, tanggal, username)VALUES (?,?,?)";
-						String sqlT2 ="INSERT INTO transaksi_detail(id,jumlah,harga,noresi,sku) VALUES(?,?,?,?,?)";
-						PreparedStatement pstT = connection.prepareStatement(sqlT);
-						PreparedStatement pstT2 = connection.prepareStatement(sqlT2);
 						Timestamp timestamp = new Timestamp(new Date().getTime());   //tangggaltransaksi
-//						pstT.setString(1,);
+						
+						String cek = "SELECT * from transaksi where noresi=?";        //cek apakah noresi ada ditable
+						PreparedStatement pcek = connection.prepareStatement(cek);
+						pcek.setString(1,  noResiTField.getText());
+						ResultSet rs=pcek.executeQuery();
+						int count = 0; 
+						
+						while (rs.next()) {
+							count = count+1;
+						}
+						if(count==1) {			//kalau ada noresi di table 
+						String justUpdate = "UPDATE transaksi SET tanggal=? WHERE noresi=?";
+						PreparedStatement pTgl = connection.prepareStatement(justUpdate);
+						pTgl.setTimestamp(1, timestamp);
+						pTgl.setString(2, noResiTField.getText());
+						pTgl.executeUpdate();
+						}
+						
+						else {				//kalau belum ada noresi ditable 
+							
+						String sqlT = "INSERT INTO transaksi (noresi, tanggal, username)VALUES (?,?,?)";	
+						PreparedStatement pstT = connection.prepareStatement(sqlT);
+						pstT.setString(1, noResiTField.getText() );
 						pstT.setTimestamp(2, timestamp);
-						pstT.setString(3, Login.userTransaksi);
-						pstT.executeUpdate();
-						pstT2.setString(1, noResiTField.getText());
+			     		pstT.setString(3, Login.userTransaksi);
+						pstT.executeUpdate();	
+						} 					
+						
+										//transaksi_detail 
+						String sqlT2 ="INSERT INTO transaksi_detail(id,jumlah,harga,noresi,sku) VALUES(?,?,?,?,?)";
+						PreparedStatement pstT2 = connection.prepareStatement(sqlT2);
+						pstT2.setString(1, idTransaksiField.getText());   
 						pstT2.setInt(2, jumlah);
 						pstT2.setInt(3, getHarga);
-						pstT2.setString(4, idTransaksiField.getText());
+						pstT2.setString(4, noResiTField.getText());
 						pstT2.setString(5, s);
 						pstT2.executeUpdate();
 						
-						//UPADATE SQL STOCK 
+						String sqlUpdateStock = "UPDATE barang SET stock=? WHERE sku=?";   //UPDATE STOK LAH
+						PreparedStatement pstUS = connection.prepareStatement(sqlUpdateStock);
+						pstUS.setInt(1, getSisaStock);   
+						pstUS.setString(2, s);
+						pstUS.executeUpdate();
+						
+						int confirm = JOptionPane.showConfirmDialog(null, "Data Sudah Masuk!!, Ingin Melakukan Transaksi Lagi?", "Konfirmasi", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						if(confirm ==  0) {
+							FormTransaksi f = new FormTransaksi();
+							f.setVisible(true);
+							dispose();
+						}
+						else {
+							TableTransaksi t = new TableTransaksi();
+							t.setVisible(true);
+							dispose();
+						}
 					}
 					
 				} catch (SQLException e1) {
