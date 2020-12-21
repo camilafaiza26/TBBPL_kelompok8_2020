@@ -43,12 +43,13 @@ public class FormKelolaUser extends JFrame {
 	private JPanel contentPane;
 	private Image img_user = new ImageIcon (Dashboard.class.getResource("/ico/user.png")).getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 	private Image img_store = new ImageIcon (Dashboard.class.getResource("/ico/store.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+	private Image img_username = new ImageIcon (Login.class.getResource("/ico/lock.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+	private Image img_email = new ImageIcon (Login.class.getResource("/ico/email.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+	private Image img_password = new ImageIcon (Login.class.getResource("/ico/keyhole.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private static JTextField usernameField;
 	private static JTextField emailField;
 	private static JTable table;
 	private static JPasswordField pwdPassword;
-	private JButton btnEdit;
-	private JButton btnDelete;
 	private JTextField searchField;
 	
 	
@@ -57,13 +58,12 @@ public class FormKelolaUser extends JFrame {
 	 */
 	
 	static Connection connection = null;
+	private JLabel lblAnnounce = new JLabel("");
 	public FormKelolaUser() throws SQLException{
 		initialize();
 		connection = Koneksi.koneksiDB();
 		refreshTable();
 	}
-	
-	static ArrayList<User> ListUser = new ArrayList<>();
 	
 	public static void refreshTable() throws SQLException{
 		
@@ -139,7 +139,7 @@ public class FormKelolaUser extends JFrame {
 			}
 		});
 		usernameField.setText("Username");
-		usernameField.setBounds(29, 201, 275, 31);
+		usernameField.setBounds(92, 181, 212, 31);
 		panel.add(usernameField);
 		usernameField.setColumns(10);
 		
@@ -163,7 +163,7 @@ public class FormKelolaUser extends JFrame {
 		});
 		emailField.setText("Email Address");
 		emailField.setColumns(10);
-		emailField.setBounds(29, 243, 275, 31);
+		emailField.setBounds(92, 229, 212, 31);
 		panel.add(emailField);
 		
 		pwdPassword = new JPasswordField();
@@ -189,7 +189,7 @@ public class FormKelolaUser extends JFrame {
 			}
 		});
 		pwdPassword.setText("Password");
-		pwdPassword.setBounds(29, 290, 275, 31);
+		pwdPassword.setBounds(92, 276, 212, 31);
 		pwdPassword.setEchoChar((char)0);
 		panel.add(pwdPassword);
 		
@@ -199,22 +199,25 @@ public class FormKelolaUser extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				
 				try {
-					
-					String sql = "INSERT INTO user (username, login_terakhir, email, password) VALUES (?,?,?,?)";
-					PreparedStatement pstm = connection.prepareStatement(sql);
-					pstm.setString(1, usernameField.getText());
-					Timestamp timestamp = new Timestamp (new Date().getTime());
-					pstm.setTimestamp(2, timestamp);
-					pstm.setString(3, emailField.getText());
-					pstm.setString(4, pwdPassword.getText());
-					pstm.execute();
-					JOptionPane.showMessageDialog(null, "Add New User Success");
-					refreshTable();
-					clearField();
-					
+					if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
+						lblAnnounce.setText("Please input all requirements above!");
+					}
+					else {
+						String sql = "INSERT INTO user (username, login_terakhir, email, password) VALUES (?,?,?,?)";
+						PreparedStatement pstm = connection.prepareStatement(sql);
+						pstm.setString(1, usernameField.getText());
+						Timestamp timestamp = new Timestamp (new Date().getTime());
+						pstm.setTimestamp(2, timestamp);
+						pstm.setString(3, emailField.getText());
+						pstm.setString(4, pwdPassword.getText());
+						pstm.execute();
+						JOptionPane.showMessageDialog(null, "Add New User Success");
+						refreshTable();
+						clearField();
+					}
 				}
 				catch(SQLException e1) {
-					JOptionPane.showMessageDialog(null, "Cannot connect to database");
+					JOptionPane.showMessageDialog(null, e1.getMessage());
 				}
 			}
 		});
@@ -229,17 +232,21 @@ public class FormKelolaUser extends JFrame {
 				
 				
 				try {
-					String sql = "UPDATE user SET email=?, password=? WHERE username=?";
-					PreparedStatement pstm = connection.prepareStatement(sql);
-					
-					pstm.setString(3, usernameField.getText());
-					pstm.setString(1, emailField.getText());
-					pstm.setString(2, pwdPassword.getText());
-					pstm.executeUpdate();
-					JOptionPane.showMessageDialog(null, "Update Success");
-					refreshTable();
-					clearField();
-					
+					if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
+						JOptionPane.showMessageDialog(null, "Please select user!");
+					}
+					else {
+						String sql = "UPDATE user SET email=?, password=? WHERE username=?";
+						PreparedStatement pstm = connection.prepareStatement(sql);
+						
+						pstm.setString(3, usernameField.getText());
+						pstm.setString(1, emailField.getText());
+						pstm.setString(2, pwdPassword.getText());
+						pstm.executeUpdate();
+						JOptionPane.showMessageDialog(null, "Update Success");
+						refreshTable();
+						clearField();
+					}
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -287,24 +294,43 @@ public class FormKelolaUser extends JFrame {
 				db.setVisible(true);
 			}
 		});
-		btnDashboard.setBounds(145, 527, 90, 29);
+		btnDashboard.setBounds(94, 517, 75, 29);
 		panel.add(btnDashboard);
 		
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setIcon(new ImageIcon(img_store));
-		lblNewLabel.setBounds(85, 517, 45, 45);
+		lblNewLabel.setBounds(184, 506, 45, 45);
 		
 		panel.add(lblNewLabel);
+		lblAnnounce.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		
+		lblAnnounce.setBounds(29, 323, 275, 29);
+		panel.add(lblAnnounce);
+		
+		JLabel lblNewLabel_1 = new JLabel("");
+		lblNewLabel_1.setBounds(42, 181, 35, 35);
+		lblNewLabel_1.setIcon(new ImageIcon (img_username));
+		panel.add(lblNewLabel_1);
+		
+		JLabel lblNewLabel_1_1 = new JLabel("");
+		lblNewLabel_1_1.setBounds(42, 229, 35, 35);
+		lblNewLabel_1_1.setIcon(new ImageIcon (img_email));
+		panel.add(lblNewLabel_1_1);
+		
+		JLabel lblNewLabel_1_1_1 = new JLabel("");
+		lblNewLabel_1_1_1.setBounds(42, 276, 35, 35);
+		lblNewLabel_1_1_1.setIcon(new ImageIcon (img_password));
+		panel.add(lblNewLabel_1_1_1);
 		
 		JLabel lblTitle = new JLabel("Pengelolaan User");
-		lblTitle.setFont(new Font("Nirmala UI", Font.PLAIN, 32));
+		lblTitle.setFont(new Font("Tahoma", Font.BOLD, 50));
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTitle.setBounds(333, 16, 775, 85);
+		lblTitle.setBounds(331, 28, 777, 85);
 		contentPane.add(lblTitle);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(367, 197, 710, 371);
+		scrollPane.setBounds(367, 226, 710, 342);
 		contentPane.add(scrollPane);
 		
 		table = new JTable();
@@ -392,7 +418,7 @@ public class FormKelolaUser extends JFrame {
 			}
 		});
 		searchField.setText("Search");
-		searchField.setBounds(367, 154, 179, 31);
+		searchField.setBounds(367, 179, 179, 31);
 		contentPane.add(searchField);
 		searchField.setColumns(10);
 		

@@ -3,6 +3,7 @@ package kasir;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,6 +21,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -39,6 +41,7 @@ public class Login extends JFrame {
 	private Image img_username = new ImageIcon (Login.class.getResource("/ico/lock.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_password = new ImageIcon (Login.class.getResource("/ico/keyhole.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_login = new ImageIcon (Login.class.getResource("/ico/enter.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+	private Image img_user = new ImageIcon (Dashboard.class.getResource("/ico/user.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
 	static  String userTransaksi;
 	
 	/**
@@ -46,10 +49,18 @@ public class Login extends JFrame {
 	 */
 	static Connection connection = null;
 	int salah = 0;
-	
+	int count = 0; 
 	public Login() throws SQLException{
 		initialize();
 		connection = Koneksi.koneksiDB();
+		// mengambil ukuran layar
+        Dimension layar = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // membuat titik x dan y
+        int x = layar.width / 2  - this.getSize().width / 2;
+        int y = layar.height / 2 - this.getSize().height / 2;
+
+        this.setLocation(x, y);	
 	}
 	
 	public static void main(String[] args) {
@@ -175,7 +186,7 @@ public class Login extends JFrame {
 		panelLogin.setLayout(null);
 		
 		JButton btnNewButton = new JButton("Log In");
-		btnNewButton.setBounds(85, 13, 79, 29);
+		btnNewButton.setBounds(99, 12, 79, 29);
 		btnNewButton.setForeground(new Color(255, 255, 255));
 		btnNewButton.setBackground(new Color(105, 105, 105));
 		panelLogin.add(btnNewButton);
@@ -183,7 +194,7 @@ public class Login extends JFrame {
 		JLabel lblIconLogin = new JLabel("");
 		lblIconLogin.setHorizontalAlignment(SwingConstants.CENTER);
 		lblIconLogin.setIcon(new ImageIcon(Login.class.getResource("/ico/enter.png")));
-		lblIconLogin.setBounds(171, 0, 53, 53);
+		lblIconLogin.setBounds(169, 0, 53, 53);
 		lblIconLogin.setIcon(new ImageIcon(img_login));
 		panelLogin.add(lblIconLogin);
 		
@@ -194,14 +205,17 @@ public class Login extends JFrame {
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
 				
-				try {		
+				if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
+					lblLogin.setText("Please input all requirements above!");
+				}
+				else {
+					try {		
 					
 					String sql = "SELECT * FROM user WHERE username=? and password=?";
 					PreparedStatement pst = connection.prepareStatement(sql);
 					pst.setString(1, usernameField.getText());
 					pst.setString(2, pwdPassword.getText());
 					ResultSet rs=pst.executeQuery();
-					int count = 0; 
 					
 					while (rs.next()) {
 						count = count+1;
@@ -220,23 +234,19 @@ public class Login extends JFrame {
 							Dashboard db = new Dashboard();
 							db.setVisible(true);
 							dispose();
-							userTransaksi="admin";   //ketika admin masuk, transaksi username berubah
+							userTransaksi="admin";  
 						}else {
-							userTransaksi= usernameField.getText(); //ketika kasir masuk
+							userTransaksi= usernameField.getText(); 
 							DashboardKasir barang = new DashboardKasir();
 							barang.setVisible(true);
 							dispose();
 						}
 							
 					}
-					else if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
-							lblLogin.setText("Please input all requirements above!");
-					}
 					
 					else {
 						salah = salah +1;
-						
-						
+										
 						if (salah==3){
 							RandomString random = new RandomString();
 							random.getRandom();
@@ -249,11 +259,12 @@ public class Login extends JFrame {
 							pstp.setString(2, usernameField.getText());
 							pstp.executeUpdate();
 							
-							//lblLogin.setText("Password have been reset automatically");
+							JOptionPane.showMessageDialog(null, "Password have been reset automatically");
 						}
+						
 						else {
 							lblLogin.setText("Invalid username or password! " + salah);
-								
+							
 						}
 					
 							
@@ -263,19 +274,19 @@ public class Login extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+				}
 			}
 		});
 	}
 	
 	public class RandomString {
-	    private char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".toCharArray();
+	    private char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890".toCharArray();
 	    private StringBuilder stringBuilder = new StringBuilder();
 	    private Random random = new Random();
 	    private String output;
 
 	    public String getRandom() {
-	        for (int lenght = 0; lenght < 10; lenght++) {
+	        for (int lenght = 0; lenght < 8; lenght++) {
 	            Character character = chars[random.nextInt(chars.length)];
 	            stringBuilder.append(character);
 	        }
