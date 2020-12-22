@@ -34,22 +34,6 @@ public class FormDetailBarang extends JFrame {
 	private JLabel sku, nama, stock, harga_jual, harga_beli;
 
 	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FormDetailBarang frame = new FormDetailBarang();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
 	 * Create the frame.
 	 */
 	public FormDetailBarang() throws SQLException {
@@ -100,7 +84,7 @@ public class FormDetailBarang extends JFrame {
 		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 12));
 		
 		JLabel lblNewLabel_2_4 = new JLabel("HARGA JUAL      :");
-		lblNewLabel_2_4.setBounds(20, 155, 106, 25);
+		lblNewLabel_2_4.setBounds(49, 155, 106, 25);
 		panel_2.add(lblNewLabel_2_4);
 		lblNewLabel_2_4.setEnabled(false);
 		lblNewLabel_2_4.setForeground(new Color(153, 255, 51));
@@ -108,7 +92,7 @@ public class FormDetailBarang extends JFrame {
 		lblNewLabel_2_4.setBackground(new Color(102, 153, 51));
 		
 		JLabel lblNewLabel_2_3 = new JLabel("HARGA BELI       :");
-		lblNewLabel_2_3.setBounds(20, 119, 106, 25);
+		lblNewLabel_2_3.setBounds(49, 119, 106, 25);
 		panel_2.add(lblNewLabel_2_3);
 		lblNewLabel_2_3.setEnabled(false);
 		lblNewLabel_2_3.setForeground(new Color(153, 255, 51));
@@ -116,7 +100,7 @@ public class FormDetailBarang extends JFrame {
 		lblNewLabel_2_3.setBackground(new Color(153, 204, 204));
 		
 		JLabel lblNewLabel_2_2 = new JLabel("JUMLAH STOCK : ");
-		lblNewLabel_2_2.setBounds(20, 83, 118, 25);
+		lblNewLabel_2_2.setBounds(49, 83, 118, 25);
 		panel_2.add(lblNewLabel_2_2);
 		lblNewLabel_2_2.setEnabled(false);
 		lblNewLabel_2_2.setForeground(new Color(153, 255, 51));
@@ -124,7 +108,7 @@ public class FormDetailBarang extends JFrame {
 		lblNewLabel_2_2.setBackground(new Color(102, 153, 51));
 		
 		JLabel lblNewLabel_2_1 = new JLabel("NAMA BARANG  : ");
-		lblNewLabel_2_1.setBounds(20, 47, 118, 25);
+		lblNewLabel_2_1.setBounds(49, 47, 118, 25);
 		panel_2.add(lblNewLabel_2_1);
 		lblNewLabel_2_1.setEnabled(false);
 		lblNewLabel_2_1.setForeground(new Color(153, 255, 51));
@@ -132,7 +116,7 @@ public class FormDetailBarang extends JFrame {
 		lblNewLabel_2_1.setBackground(new Color(102, 153, 51));
 		
 		JLabel lblNewLabel_2 = new JLabel(" SKU                      : ");
-		lblNewLabel_2.setBounds(16, 11, 126, 25);
+		lblNewLabel_2.setBounds(45, 11, 126, 25);
 		panel_2.add(lblNewLabel_2);
 		lblNewLabel_2.setEnabled(false);
 		lblNewLabel_2.setBackground(new Color(102, 153, 51));
@@ -144,7 +128,7 @@ public class FormDetailBarang extends JFrame {
 		sku.setFont(new Font("Tahoma", Font.BOLD, 12));
 		sku.setEnabled(false);
 		sku.setBackground(new Color(102, 153, 51));
-		sku.setBounds(141, 11, 126, 25);
+		sku.setBounds(170, 11, 126, 25);
 		panel_2.add(sku);
 		
 		nama = new JLabel("i");
@@ -152,7 +136,7 @@ public class FormDetailBarang extends JFrame {
 		nama.setFont(new Font("Tahoma", Font.BOLD, 12));
 		nama.setEnabled(false);
 		nama.setBackground(new Color(102, 153, 51));
-		nama.setBounds(141, 47, 126, 25);
+		nama.setBounds(170, 47, 126, 25);
 		panel_2.add(nama);
 		
 		stock = new JLabel("i");
@@ -160,7 +144,7 @@ public class FormDetailBarang extends JFrame {
 		stock.setFont(new Font("Tahoma", Font.BOLD, 12));
 		stock.setEnabled(false);
 		stock.setBackground(new Color(102, 153, 51));
-		stock.setBounds(141, 83, 126, 25);
+		stock.setBounds(170, 83, 126, 25);
 		panel_2.add(stock);
 		
 		harga_beli = new JLabel("i");
@@ -168,7 +152,7 @@ public class FormDetailBarang extends JFrame {
 		harga_beli.setFont(new Font("Tahoma", Font.BOLD, 12));
 		harga_beli.setEnabled(false);
 		harga_beli.setBackground(new Color(102, 153, 51));
-		harga_beli.setBounds(141, 119, 126, 25);
+		harga_beli.setBounds(170, 119, 126, 25);
 		panel_2.add(harga_beli);
 		
 		harga_jual = new JLabel("i");
@@ -176,7 +160,7 @@ public class FormDetailBarang extends JFrame {
 		harga_jual.setFont(new Font("Tahoma", Font.BOLD, 12));
 		harga_jual.setEnabled(false);
 		harga_jual.setBackground(new Color(102, 153, 51));
-		harga_jual.setBounds(141, 155, 126, 25);
+		harga_jual.setBounds(170, 155, 126, 25);
 		panel_2.add(harga_jual);
 		
 		JPanel panel_1 = new JPanel();

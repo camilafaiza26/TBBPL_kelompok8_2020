@@ -91,8 +91,7 @@ public class FormKelolaBarang extends JFrame {
 		ArrayList<Barang> barang = new ArrayList<>();
 		try {
 			
-			Connection conn = (Connection)Koneksi.koneksiDB();
-			stmt = conn.createStatement();
+			stmt = connection.createStatement();
 			String sql = "SELECT * FROM barang";
 			rs = stmt.executeQuery(sql);
 			
@@ -123,9 +122,8 @@ public class FormKelolaBarang extends JFrame {
 		
 		try {
 			
-			Connection conn = (Connection)Koneksi.koneksiDB();
 			String sql="SELECT * FROM barang WHERE sku LIKE ? OR nama LIKE ? OR stock LIKE ? OR harga_jual LIKE ? OR harga_beli LIKE ?";
-			pst = conn.prepareStatement(sql);
+			pst = connection.prepareStatement(sql);
 			
 			pst.setString(1, "%"+key+"%");
 			pst.setString(2, "%"+key+"%");
@@ -304,6 +302,7 @@ public class FormKelolaBarang extends JFrame {
 		panel_2.add(lblNewLabel_1);
 		
 		btnAdd = new JButton("ADD");
+		btnAdd.setBackground(new Color(0, 206, 209));
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -326,6 +325,8 @@ public class FormKelolaBarang extends JFrame {
 							statement.setInt(4, (int) spinnerBeli.getValue());
 							statement.setInt(5, (int) spinnerJual.getValue());
 							statement.executeUpdate();
+							refreshTable();
+							clearField();
 							
 							JOptionPane.showMessageDialog(null, "DATA BERHASIL DITAMBAHKAN");
 							
@@ -334,9 +335,6 @@ public class FormKelolaBarang extends JFrame {
 							JOptionPane.showMessageDialog(null, "MASUKKAN HARGA DENGAN BENAR");
 							
 						}
-						
-						refreshTable();
-						clearField();
 						
 					}
 					
@@ -348,18 +346,18 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnAdd.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnAdd.setBounds(47, 416, 106, 33);
+		btnAdd.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnAdd.setBounds(47, 416, 104, 33);
 		panel_2.add(btnAdd);
 		
 		JButton btnEdit_1 = new JButton("EDIT");
+		btnEdit_1.setBackground(new Color(0, 206, 209));
 		btnEdit_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				try {
 					
-					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
-						spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+					if(skuField.getText().equals("") || namaField.getText().equals("")) {
 							
 						JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DIEDIT");
 							
@@ -379,6 +377,8 @@ public class FormKelolaBarang extends JFrame {
 								statement.setInt(3, (int) spinnerJual.getValue());
 								statement.executeUpdate();
 								JOptionPane.showMessageDialog(null, "DATA BERHASIL DIUPDATE");
+								refreshTable();
+								clearField();
 								
 							}
 						
@@ -387,9 +387,6 @@ public class FormKelolaBarang extends JFrame {
 							JOptionPane.showMessageDialog(null, "MASUKKAN HARGA DENGAN BENAR");
 							
 						}
-						
-						refreshTable();
-						clearField();
 						
 					}
 					
@@ -401,18 +398,18 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnEdit_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnEdit_1.setFont(new Font("Tahoma", Font.BOLD, 14));
 		btnEdit_1.setBounds(163, 416, 85, 33);
 		panel_2.add(btnEdit_1);
 		
 		JButton btnDelete = new JButton("DELETE");
+		btnDelete.setBackground(new Color(0, 206, 209));
 		btnDelete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				try {
 					
-					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
-							spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+					if(skuField.getText().equals("")) {
 								
 							JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DIHAPUS");
 								
@@ -439,11 +436,12 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnDelete.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnDelete.setBounds(47, 464, 106, 33);
+		btnDelete.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnDelete.setBounds(161, 460, 87, 33);
 		panel_2.add(btnDelete);
 		
 		btnPrint = new JButton("PRINT");
+		btnPrint.setBackground(new Color(0, 206, 209));
 		btnPrint.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
@@ -459,18 +457,18 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnPrint.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnPrint.setBounds(163, 464, 85, 33);
+		btnPrint.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnPrint.setBounds(47, 504, 104, 33);
 		panel_2.add(btnPrint);
 		
 		JButton btnRestock = new JButton("RESTOCK");
+		btnRestock.setBackground(new Color(0, 206, 209));
 		btnRestock.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				try {
 					
-					if(skuField.getText().equals("") || namaField.getText().equals("") || spinnerStock.getValue().equals(0) ||
-							spinnerBeli.getValue().equals(0) || spinnerJual.getValue().equals(0)) {
+					if(skuField.getText().equals("") || namaField.getText().equals("")) {
 								
 							JOptionPane.showMessageDialog(null, "PILIH TERLEBIH DAHULU DATA BARANG YANG AKAN DIRESTOCK");
 								
@@ -502,12 +500,12 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnRestock.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnRestock.setBounds(46, 514, 106, 33);
+		btnRestock.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnRestock.setBounds(47, 460, 104, 33);
 		panel_2.add(btnRestock);
 		
 		JButton btnBack = new JButton("BACK");
-		btnBack.setBounds(24, 588, 85, 33);
+		btnBack.setBounds(22, 594, 85, 33);
 		panel_2.add(btnBack);
 		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -523,9 +521,10 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnBack.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnBack.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 		JButton btnNewButton = new JButton("DETAIL");
+		btnNewButton.setBackground(new Color(0, 206, 209));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
@@ -564,8 +563,8 @@ public class FormKelolaBarang extends JFrame {
 				
 			}
 		});
-		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnNewButton.setBounds(163, 516, 89, 32);
+		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnNewButton.setBounds(159, 504, 89, 32);
 		panel_2.add(btnNewButton);
 		
 		JLabel lblNewLabel_2 = new JLabel("SKU");
@@ -615,6 +614,17 @@ public class FormKelolaBarang extends JFrame {
 		lblNewLabel_2_1_1_1_1.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblNewLabel_2_1_1_1_1.setBounds(52, 344, 113, 14);
 		panel_2.add(lblNewLabel_2_1_1_1_1);
+		
+		JButton btnBatal = new JButton("BATAL");
+		btnBatal.setBackground(new Color(0, 206, 209));
+		btnBatal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clearField();
+			}
+		});
+		btnBatal.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnBatal.setBounds(108, 548, 89, 32);
+		panel_2.add(btnBatal);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(null);
