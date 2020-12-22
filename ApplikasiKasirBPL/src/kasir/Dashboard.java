@@ -179,10 +179,18 @@ public class Dashboard extends JFrame {
 		lblLaporan.setIcon(new ImageIcon(img_laporan));
 		panelLaporan.add(lblLaporan);
 		
-		JButton btnLaporan = new JButton("Pengelolaan Laporan");
+		JButton btnLaporan = new JButton("Laporan Keuangan");
 		btnLaporan.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				LaporanKeuangan db;
+				try {
+					db = new LaporanKeuangan();
+					db.setVisible(true);
+					dispose();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnLaporan.setForeground(Color.WHITE);
