@@ -17,6 +17,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import java.awt.Toolkit;
 
 public class Dashboard extends JFrame {
 
@@ -49,6 +50,8 @@ public class Dashboard extends JFrame {
 	 * Create the frame.
 	 */
 	public Dashboard() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Dashboard.class.getResource("/ico/store.png")));
+		setTitle("Home");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1130, 640);
 		contentPane = new JPanel();

@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.awt.event.ActionEvent;
@@ -41,7 +42,6 @@ public class Login extends JFrame {
 	private Image img_username = new ImageIcon (Login.class.getResource("/ico/lock.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_password = new ImageIcon (Login.class.getResource("/ico/keyhole.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 	private Image img_login = new ImageIcon (Login.class.getResource("/ico/enter.png")).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-	private Image img_user = new ImageIcon (Dashboard.class.getResource("/ico/user.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
 	static  String userTransaksi;
 	
 	/**
@@ -50,7 +50,9 @@ public class Login extends JFrame {
 	static Connection connection = null;
 	int salah = 0;
 	int count = 0; 
+	
 	public Login() throws SQLException{
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Login.class.getResource("/ico/lock.png")));
 		initialize();
 		connection = Koneksi.koneksiDB();
 		// mengambil ukuran layar
@@ -81,6 +83,7 @@ public class Login extends JFrame {
 	 * Create the frame.
 	 */
 	public void initialize () {
+		setTitle("Login");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 656, 464);
 		contentPane = new JPanel();
@@ -110,7 +113,7 @@ public class Login extends JFrame {
 		panelUsername.add(lblIconUsername);
 		
 		usernameField = new JTextField();
-		usernameField.setBounds(93, 13, 192, 30);
+		usernameField.setBounds(56, 13, 229, 30);
 		usernameField.addFocusListener(new FocusAdapter() {
 			
 			@Override
@@ -149,7 +152,7 @@ public class Login extends JFrame {
 		lblIconPassword.setIcon(new ImageIcon(img_password));
 		
 		pwdPassword = new JPasswordField();
-		pwdPassword.setBounds(94, 13, 191, 30);
+		pwdPassword.setBounds(57, 13, 228, 30);
 		pwdPassword.addFocusListener(new FocusAdapter() {
 			
 			@SuppressWarnings("deprecation")
@@ -204,78 +207,89 @@ public class Login extends JFrame {
 			
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
+				try {
 				
 				if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
 					lblLogin.setText("Please input all requirements above!");
 				}
-				else {
-					try {		
+				else {	
 					
-					String sql = "SELECT * FROM user WHERE username=? and password=?";
-					PreparedStatement pst = connection.prepareStatement(sql);
-					pst.setString(1, usernameField.getText());
-					pst.setString(2, pwdPassword.getText());
-					ResultSet rs=pst.executeQuery();
+					String sqlw = "SELECT username FROM user where username=?";
+					PreparedStatement st = connection.prepareStatement(sqlw);
+					st.setString(1, usernameField.getText());
+					ResultSet rst = st.executeQuery();
 					
-					while (rs.next()) {
-						count = count+1;
-					}
+					if (rst.next()) {	
 					
-					if(count==1) {
-						JOptionPane.showMessageDialog(null, "Log In Success");
-
-						String sqlT = "UPDATE user SET login_terakhir=? WHERE username=?";
-						PreparedStatement pstT = connection.prepareStatement(sqlT);
-						Timestamp timestamp = new Timestamp(new Date().getTime());
-						pstT.setTimestamp(1, timestamp);
-						pstT.setString(2, usernameField.getText());
-						pstT.executeUpdate();
-						if(usernameField.getText().equals("admin")) {
-							Dashboard db = new Dashboard();
-							db.setVisible(true);
-							dispose();
-							userTransaksi="admin";  
-						}else {
-							userTransaksi= usernameField.getText(); 
-							DashboardKasir barang = new DashboardKasir();
-							barang.setVisible(true);
-							dispose();
-						}
-							
-					}
-					
-					else {
-						salah = salah +1;
-										
-						if (salah==3){
-							RandomString random = new RandomString();
-							random.getRandom();
-							pwdPassword.setText(random.getRandom());
-							salah = 0;
-							
-							String sqlp = "UPDATE user SET password=? WHERE username=?";
-							PreparedStatement pstp = connection.prepareStatement(sqlp);
-							pstp.setString(1, pwdPassword.getText());
-							pstp.setString(2, usernameField.getText());
-							pstp.executeUpdate();
-							
-							JOptionPane.showMessageDialog(null, "Password have been reset automatically");
+						String sql = "SELECT * FROM user WHERE username=? and password=?";
+						PreparedStatement pst = connection.prepareStatement(sql);
+						pst.setString(1, usernameField.getText());
+						pst.setString(2, pwdPassword.getText());
+						ResultSet rs=pst.executeQuery();
+						
+						while (rs.next()) {
+							count = count+1;
 						}
 						
-						else {
-							lblLogin.setText("Invalid username or password! " + salah);
-							
+						if(count==1) {
+							JOptionPane.showMessageDialog(null, "Log In Success");
+	
+							String sqlT = "UPDATE user SET login_terakhir=? WHERE username=?";
+							PreparedStatement pstT = connection.prepareStatement(sqlT);
+							Timestamp timestamp = new Timestamp(new Date().getTime());
+							pstT.setTimestamp(1, timestamp);
+							pstT.setString(2, usernameField.getText());
+							pstT.executeUpdate();
+							if(usernameField.getText().equals("admin")) {
+								Dashboard db = new Dashboard();
+								db.setVisible(true);
+								dispose();
+								userTransaksi="admin";  
+							}else {
+								userTransaksi= usernameField.getText(); 
+								DashboardKasir barang = new DashboardKasir();
+								barang.setVisible(true);
+								dispose();
+							}
+								
 						}
-					
+						else{
+							salah = salah +1;
+											
+							if (salah==3){
+								RandomString random = new RandomString();
+								random.getRandom();
+								pwdPassword.setText(random.getRandom());
+								salah = 0;
+								
+								String sqlp = "UPDATE user SET password=? WHERE username=?";
+								PreparedStatement pstp = connection.prepareStatement(sqlp);
+								pstp.setString(1, pwdPassword.getText());
+								pstp.setString(2, usernameField.getText());
+								pstp.executeUpdate();
+								
+								JOptionPane.showMessageDialog(null, "Password have been reset automatically, Call the Admin");
+							}
 							
-					}	
+							else {
+								lblLogin.setText("Invalid username or password! " + salah);
+								
+							}
+						
+								
+						}
+					}
+					else if (rst.next() == false){
+						JOptionPane.showMessageDialog(null, "Username Not Found");
+					}
+					
+				}
 					
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				}
-			}
 		});
 	}
 	

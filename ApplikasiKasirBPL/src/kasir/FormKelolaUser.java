@@ -2,9 +2,11 @@ package kasir;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -60,9 +62,18 @@ public class FormKelolaUser extends JFrame {
 	static Connection connection = null;
 	private JLabel lblAnnounce = new JLabel("");
 	public FormKelolaUser() throws SQLException{
+		setIconImage(Toolkit.getDefaultToolkit().getImage(FormKelolaUser.class.getResource("/ico/user.png")));
 		initialize();
 		connection = Koneksi.koneksiDB();
 		refreshTable();
+		// mengambil ukuran layar
+        Dimension layar = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // membuat titik x dan y
+        int x = layar.width / 2  - this.getSize().width / 2;
+        int y = layar.height / 2 - this.getSize().height / 2;
+
+        this.setLocation(x, y);	
 	}
 	
 	public static void refreshTable() throws SQLException{
@@ -101,6 +112,7 @@ public class FormKelolaUser extends JFrame {
 	 * Create the frame.
 	 */
 	public void initialize () {
+		setTitle("Pengelolaan User");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1130, 640);
 		contentPane = new JPanel();
@@ -203,17 +215,23 @@ public class FormKelolaUser extends JFrame {
 						lblAnnounce.setText("Please input all requirements above!");
 					}
 					else {
-						String sql = "INSERT INTO user (username, login_terakhir, email, password) VALUES (?,?,?,?)";
-						PreparedStatement pstm = connection.prepareStatement(sql);
-						pstm.setString(1, usernameField.getText());
-						Timestamp timestamp = new Timestamp (new Date().getTime());
-						pstm.setTimestamp(2, timestamp);
-						pstm.setString(3, emailField.getText());
-						pstm.setString(4, pwdPassword.getText());
-						pstm.execute();
-						JOptionPane.showMessageDialog(null, "Add New User Success");
-						refreshTable();
-						clearField();
+						if (emailField.getText().contains("@")) {
+							String sql = "INSERT INTO user (username, login_terakhir, email, password) VALUES (?,?,?,?)";
+							PreparedStatement pstm = connection.prepareStatement(sql);
+							pstm.setString(1, usernameField.getText());
+							Timestamp timestamp = new Timestamp (new Date().getTime());
+							pstm.setTimestamp(2, timestamp);
+							pstm.setString(3, emailField.getText());
+							pstm.setString(4, pwdPassword.getText());
+							pstm.execute();
+							JOptionPane.showMessageDialog(null, "Add New User Success");
+							refreshTable();
+							clearField();
+							lblAnnounce.setText("");
+						}
+						else {
+							lblAnnounce.setText("Input Email Address correctly");
+						}
 					}
 				}
 				catch(SQLException e1) {
@@ -246,7 +264,10 @@ public class FormKelolaUser extends JFrame {
 						JOptionPane.showMessageDialog(null, "Update Success");
 						refreshTable();
 						clearField();
+						btnUser.setEnabled(true);
+						usernameField.enable();
 					}
+					
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -265,13 +286,18 @@ public class FormKelolaUser extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				
 				try {
-					String sql = "DELETE FROM user WHERE username = ?";
-					PreparedStatement pstm = connection.prepareStatement(sql);
-					pstm.setString(1, usernameField.getText());
-					pstm.execute();
-					JOptionPane.showMessageDialog(null, "User have been delete");
-					refreshTable();
-					clearField();
+					if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
+						JOptionPane.showMessageDialog(null, "Please select user!");
+					}
+					else {
+						String sql = "DELETE FROM user WHERE username = ?";
+						PreparedStatement pstm = connection.prepareStatement(sql);
+						pstm.setString(1, usernameField.getText());
+						pstm.execute();
+						JOptionPane.showMessageDialog(null, "User have been delete");
+						refreshTable();
+						clearField();
+					}
 					
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
@@ -351,6 +377,9 @@ public class FormKelolaUser extends JFrame {
 						usernameField.setText(rs.getString("username"));
 						emailField.setText(rs.getString("email"));
 						pwdPassword.setText(rs.getString("password"));
+						
+						btnUser.setEnabled(false);
+						usernameField.disable();
 					}
 					
 				}
