@@ -15,11 +15,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -62,7 +63,6 @@ public class FormKelolaUser extends JFrame {
 	static Connection connection = null;
 	private JLabel lblAnnounce = new JLabel("");
 	public FormKelolaUser() throws SQLException{
-		setIconImage(Toolkit.getDefaultToolkit().getImage(FormKelolaUser.class.getResource("/ico/user.png")));
 		initialize();
 		connection = Koneksi.koneksiDB();
 		refreshTable();
@@ -78,12 +78,23 @@ public class FormKelolaUser extends JFrame {
 	
 	public static void refreshTable() throws SQLException{
 		
-		String sql = "SELECT * FROM user";
-		PreparedStatement pst = connection.prepareStatement(sql);
-		ResultSet rs = pst.executeQuery();
-		table.setModel(DbUtils.resultSetToTableModel(rs));
-		pst.close();
-		rs.close();
+		LinkedList <User> list = showData();
+		DefaultTableModel tb = new DefaultTableModel();
+		
+		tb.addColumn("USERNAME");
+		tb.addColumn("LOGIN TERAKHIR");
+		tb.addColumn("EMAIL");
+		tb.addColumn("PASSSWORD");
+		table.setModel(tb);
+		
+		for(User user : list){
+            
+           tb.addRow(new Object[] {
+        		   
+        		   user.getUsername(), user.getDate(),  user.getEmail(), user.getPassword()
+             
+           });
+		}
 		
 	}
 	
@@ -93,6 +104,60 @@ public class FormKelolaUser extends JFrame {
 		emailField.setText("Email Address");
 		pwdPassword.setText("Password");
 		pwdPassword.setEchoChar((char)0);
+	}
+	
+	//Menampilkan Data
+	public static LinkedList<User> showData(){
+			
+		LinkedList<User> user = new LinkedList<>();
+			try {
+				
+				Statement stmt = connection.createStatement();
+				String sql = "SELECT * FROM user";
+				ResultSet rs = stmt.executeQuery(sql);
+				
+				while(rs.next()) {
+					user.add(new User(rs.getString("username"),
+									  rs.getString("login_terakhir"),
+									  rs.getString("email"), 
+									  rs.getString("password")));
+				}
+				rs.close();	
+			} 
+			catch (Exception e) {	
+				JOptionPane.showMessageDialog(null, e.getMessage());	
+			}
+		return user;
+	}
+		
+		//Mencari Data
+	public static LinkedList<User> cariUser(String key){
+			
+		LinkedList<User> user = new LinkedList<User>();		
+			try {
+				
+				String sql="SELECT * FROM user WHERE username LIKE ? OR email LIKE ? ";
+				PreparedStatement pst = connection.prepareStatement(sql);
+				
+				pst.setString(1, "%"+key+"%");
+				pst.setString(2, "%"+key+"%");
+				ResultSet rs = pst.executeQuery();
+				
+				while(rs.next()) {
+					
+					user.add(new User(rs.getString("username"),
+							  rs.getString("login_terakhir"),
+							  rs.getString("email"), 
+							  rs.getString("password")));
+					
+				}
+				rs.close();			
+			}
+			catch(Exception e) {
+				JOptionPane.showMessageDialog(null, e.getMessage());		
+			}	
+		return user;
+		
 	}
 	
 	public static void main(String[] args) {
@@ -112,7 +177,6 @@ public class FormKelolaUser extends JFrame {
 	 * Create the frame.
 	 */
 	public void initialize () {
-		setTitle("Pengelolaan User");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1130, 640);
 		contentPane = new JPanel();
@@ -215,7 +279,7 @@ public class FormKelolaUser extends JFrame {
 						lblAnnounce.setText("Please input all requirements above!");
 					}
 					else {
-						if (emailField.getText().contains("@")) {
+						if(emailField.getText().contains("@")) {
 							String sql = "INSERT INTO user (username, login_terakhir, email, password) VALUES (?,?,?,?)";
 							PreparedStatement pstm = connection.prepareStatement(sql);
 							pstm.setString(1, usernameField.getText());
@@ -228,10 +292,9 @@ public class FormKelolaUser extends JFrame {
 							refreshTable();
 							clearField();
 							lblAnnounce.setText("");
-						}
-						else {
-							lblAnnounce.setText("Input Email Address correctly");
-						}
+						}else {
+							lblAnnounce.setText("Check Again Your Email Format");
+						}		
 					}
 				}
 				catch(SQLException e1) {
@@ -254,20 +317,25 @@ public class FormKelolaUser extends JFrame {
 						JOptionPane.showMessageDialog(null, "Please select user!");
 					}
 					else {
-						String sql = "UPDATE user SET email=?, password=? WHERE username=?";
-						PreparedStatement pstm = connection.prepareStatement(sql);
+						if(emailField.getText().contains("@")) {
+							String sql = "UPDATE user SET email=?, password=? WHERE username=?";
+							PreparedStatement pstm = connection.prepareStatement(sql);
+							
+							pstm.setString(3, usernameField.getText());
+							pstm.setString(1, emailField.getText());
+							pstm.setString(2, pwdPassword.getText());
+							pstm.executeUpdate();
+							JOptionPane.showMessageDialog(null, "Update Success");
+							refreshTable();
+							clearField();
+							usernameField.enable();
+							btnUser.setEnabled(true);
+							lblAnnounce.setText("");
+						}else {
+							lblAnnounce.setText("Check Again Your Email Format");
+						}
 						
-						pstm.setString(3, usernameField.getText());
-						pstm.setString(1, emailField.getText());
-						pstm.setString(2, pwdPassword.getText());
-						pstm.executeUpdate();
-						JOptionPane.showMessageDialog(null, "Update Success");
-						refreshTable();
-						clearField();
-						btnUser.setEnabled(true);
-						usernameField.enable();
 					}
-					
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -297,8 +365,10 @@ public class FormKelolaUser extends JFrame {
 						JOptionPane.showMessageDialog(null, "User have been delete");
 						refreshTable();
 						clearField();
+						usernameField.enable();
+						btnUser.setEnabled(true);
+						lblAnnounce.setText("");
 					}
-					
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					JOptionPane.showMessageDialog(null, "Cannot connect to database");
@@ -329,7 +399,7 @@ public class FormKelolaUser extends JFrame {
 		lblNewLabel.setBounds(184, 506, 45, 45);
 		
 		panel.add(lblNewLabel);
-		lblAnnounce.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblAnnounce.setFont(new Font("Nirmala UI", Font.BOLD, 15));
 		
 		lblAnnounce.setBounds(29, 323, 275, 29);
 		panel.add(lblAnnounce);
@@ -378,8 +448,8 @@ public class FormKelolaUser extends JFrame {
 						emailField.setText(rs.getString("email"));
 						pwdPassword.setText(rs.getString("password"));
 						
-						btnUser.setEnabled(false);
 						usernameField.disable();
+						btnUser.setEnabled(false);
 					}
 					
 				}
@@ -388,24 +458,6 @@ public class FormKelolaUser extends JFrame {
 				}
 			}
 		});
-		table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		table.setFillsViewportHeight(true);
-		table.setModel(new DefaultTableModel(
-				new Object[][] {
-					{null, null, null, null, null},
-				},
-				new String[] {
-					"USERNAME", "LAST LOGIN", "EMAIL ADDRESS", "PASSWORD"
-				}
-			));
-		table.getColumnModel().getColumn(0).setPreferredWidth(110);
-		table.getColumnModel().getColumn(0).setMinWidth(20);
-		table.getColumnModel().getColumn(1).setPreferredWidth(172);
-		table.getColumnModel().getColumn(1).setMinWidth(20);
-		table.getColumnModel().getColumn(2).setPreferredWidth(110);
-		table.getColumnModel().getColumn(2).setMinWidth(20);
-		table.getColumnModel().getColumn(3).setPreferredWidth(125);
-		table.getColumnModel().getColumn(3).setMinWidth(20);
 		scrollPane.setViewportView(table);
 		
 		searchField = new JTextField();
@@ -414,18 +466,30 @@ public class FormKelolaUser extends JFrame {
 			public void keyReleased(KeyEvent arg0) {
 				
 				try {
-					String sql="SELECT * FROM user WHERE username LIKE ? OR email LIKE ?";
-					PreparedStatement pstm = connection.prepareStatement(sql);
-					pstm.setString(1, "%" + searchField.getText()+"%");
-					pstm.setString(2, "%" + searchField.getText()+"%");
-					ResultSet rs = pstm.executeQuery();
-					table.setModel(DbUtils.resultSetToTableModel(rs));
 					
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LinkedList<User> list = cariUser(searchField.getText());
+					DefaultTableModel tb = new DefaultTableModel();
 					
-				}
+					tb.addColumn("USERNAME");
+					tb.addColumn("LOGIN TERAKHIR");
+					tb.addColumn("EMAIL");
+					tb.addColumn("PASSSWORD");
+					table.setModel(tb);
+					
+					for(User user : list){
+			            
+			           tb.addRow(new Object[] {
+			        		   
+			        		   user.getUsername(), user.getDate(),  user.getEmail(), user.getPassword()
+			             
+			           });
+					}
+				
+			} catch (Exception e1) {
+
+				JOptionPane.showMessageDialog(null, e1.getMessage());
+				
+			}
 				
 			}
 		});

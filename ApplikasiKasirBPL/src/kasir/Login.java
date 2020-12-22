@@ -207,14 +207,15 @@ public class Login extends JFrame {
 			
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
+				
 				try {
 				
-				if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
-					lblLogin.setText("Please input all requirements above!");
-				}
-				else {	
+					if (usernameField.getText().equals("") || usernameField.getText().equals("Username") || pwdPassword.getText().equals("") || pwdPassword.getText().equals("Password")){
+						lblLogin.setText("Please input all requirements above!");
+					}
+					else {	
 					
-					String sqlw = "SELECT username FROM user where username=?";
+					String sqlw = "SELECT username FROM user WHERE username=?";
 					PreparedStatement st = connection.prepareStatement(sqlw);
 					st.setString(1, usernameField.getText());
 					ResultSet rst = st.executeQuery();
@@ -250,8 +251,7 @@ public class Login extends JFrame {
 								DashboardKasir barang = new DashboardKasir();
 								barang.setVisible(true);
 								dispose();
-							}
-								
+							}			
 						}
 						else{
 							salah = salah +1;
@@ -268,15 +268,11 @@ public class Login extends JFrame {
 								pstp.setString(2, usernameField.getText());
 								pstp.executeUpdate();
 								
-								JOptionPane.showMessageDialog(null, "Password have been reset automatically, Call the Admin");
-							}
-							
+								JOptionPane.showMessageDialog(null, "Password have been reset automatically");
+							}							
 							else {
-								lblLogin.setText("Invalid username or password! " + salah);
-								
-							}
-						
-								
+								lblLogin.setText("Invalid username or password! " + salah);								
+							}						
 						}
 					}
 					else if (rst.next() == false){
@@ -289,7 +285,7 @@ public class Login extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				}
+			}
 		});
 	}
 	
